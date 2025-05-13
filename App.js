@@ -1,20 +1,17 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { AuthProvider, AuthContext } from "./context/AuthContext";
+import MainNavigator from "./navigation/AppNavigator";
+import { CartProvider } from './context/CartContext';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <CartProvider>
+        <MainNavigator />
+        </CartProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
