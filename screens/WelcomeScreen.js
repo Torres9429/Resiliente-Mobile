@@ -18,10 +18,9 @@ const WelcomeScreen = ({ navigation }) => {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
             <ImageBackground
                 source={require('../assets/Rectangle 9.png')}
-                style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                style={{ flex: 1, justifyContent: 'center', alignItems: 'center', }}>
                 <View style={styles.container}>
                     <Text style={styles.title}>
                         Bienvenido a <Text style={styles.titleHighlight}>Resiliente</Text>
@@ -75,7 +74,6 @@ const WelcomeScreen = ({ navigation }) => {
                 </View>
             </ImageBackground>
 
-        </SafeAreaView>
     );
 };
 
@@ -89,7 +87,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingTop: 50,
+        paddingTop: 100,
     },
     title: {
         fontSize: 28,

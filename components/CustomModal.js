@@ -1,6 +1,7 @@
 import { Video, ResizeMode } from 'expo-av';
 import { useState, useEffect, useRef } from "react";
-import { Modal, View, Text, Button, StyleSheet } from "react-native";
+import { Modal, View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
 const CustomModal = ({ visible, videoUri, onClose }) => {
     const [isVisible, setIsVisible] = useState(visible);
@@ -25,26 +26,39 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
         >
             <View style={styles.overlay}>
                 <View style={styles.modalContainer}>
+                    <View style={{ position: "absolute", top: 20, right: 30 }}>
+                        <TouchableOpacity onPress={handleClose}>
+                            <Feather name="x" size={36} color="#BACA16" />
+                        </TouchableOpacity>
+                    </View>
                     <Text style={styles.modalText}>Sigue las señas para pedir tu orden!</Text>
                     <Video
                         ref={video}
                         style={styles.video}
                         source={{
-                            //uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
                             uri: videoUri,
                         }}
                         useNativeControls
-                        resizeMode={ResizeMode.STRETCH}
+                        resizeMode={ResizeMode.COVER}
                         isLooping
                         onPlaybackStatusUpdate={status => setStatus(() => status)}
                     />
                     <View style={styles.buttons}>
-                        <Button
-                            title={status.isPlaying ? 'Pause' : 'Play'}
-                            onPress={() =>
-                                status.isPlaying ? video.current.pauseAsync() : video.current.playAsync()
-                            }
-                        />
+                        <TouchableOpacity
+                            onPress={() => {
+                                if (status.isPlaying) {
+                                    video.current.pauseAsync();
+                                } else {
+                                    video.current.playAsync();
+                                }
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name={status.isPlaying ? 'pause' : 'play'}
+                                size={36}
+                                color="#BACA16"
+                            />
+                        </TouchableOpacity>
                     </View>
                     <Button title="Close" onPress={handleClose} />
                 </View>
@@ -76,10 +90,17 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     video: {
-        width: 300,
-        height: 350,
+        width: '80%',
+        height: 400,
         marginTop: 10,
         borderRadius: 10,
-    }
+    },
+    buttons: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 10,
+        width: '100%',
+    },
 });
 export default CustomModal;

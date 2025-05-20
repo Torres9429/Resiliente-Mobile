@@ -57,7 +57,7 @@ const UserHomeScreen = () => {
             2. Revisa sus características para tener una mejor comunicación con quien te atiende.{"\n"}
             3. Selecciona el platillo que deseas ordenar.{"\n"}
             4. Sigue las instrucciones para pedir tu platillo.{"\n"}
-            5. ¡Listo! Tu orden ha sido enviada y el mesero se pondrá en contacto contigo para confirmar tu orden.
+            5. ¡Listo! 
           </Text>
         </View>
 

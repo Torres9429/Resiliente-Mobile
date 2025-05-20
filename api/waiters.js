@@ -3,6 +3,8 @@ import api from "./api";
 const endpoint = "/meseros";
 
 export const crearMesero = async (meseroDto) => {
+  console.log('recibe: ', meseroDto);
+  console.log(api.defaults.baseURL+endpoint)
   return await api.post(endpoint, meseroDto);
 };
 

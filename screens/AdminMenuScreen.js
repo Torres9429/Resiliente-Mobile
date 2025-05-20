@@ -7,17 +7,22 @@ import {
     StyleSheet,
     TouchableOpacity,
     SafeAreaView,
-    Button,
-    TextInput
+    TextInput,
+     KeyboardAvoidingView,
+    Keyboard,
+    Platform,
+    TouchableWithoutFeedback,
 } from 'react-native';
 import { obtenerTodosLosProductos } from '../api/menu';
 import { CartContext } from '../context/CartContext';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import {Ionicons} from '@expo/vector-icons';
+
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomModal from '../components/CustomModal';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 
-const Menu = () => {
+const AdminMenuScreen = () => {
     const navigation = useNavigation();
     const [menuItems, setMenuItems] = useState([]);
     const [expandedIndex, setExpandedIndex] = useState(null);
@@ -25,12 +30,25 @@ const Menu = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [videoUri, setVideoUri] = useState(null);
     const [search, setSearch] = useState('');
+    const [keyBoardVisible, setKeyBoardVisible] = useState();
 
-    const video = useRef(null);
-    const [status, setStatus] = useState({});
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+            setKeyBoardVisible(true);
+        });
+
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setKeyBoardVisible(false);
+        });
+
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
+        };
+    }, []);
 
     // filtros de búsqueda
-    const productsFiltered = menuItems.filter(product =>
+    const productsFiltered = menuItems.filter( product => 
         product.nombre.toLowerCase().includes(search.toLowerCase())
     )
 
@@ -62,7 +80,7 @@ const Menu = () => {
 
 
     const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('Detalles', { item })}>
+        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
             <Image
                 source={
                     item.foto ? { uri: item.foto } : require('../assets/default-food.png')
@@ -71,7 +89,7 @@ const Menu = () => {
             />
             <Text style={styles.name}>{item.nombre}</Text>
             <Text style={styles.category}>{item.categoria}</Text>
-
+            <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
 
             {expandedIndex === index && (
                 <View style={styles.detailsContainer}>
@@ -80,13 +98,12 @@ const Menu = () => {
                 </View>
             )}
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%', alignItems: 'center', }}>
-                <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
                 <TouchableOpacity
-                    style={styles.button2}
-                    onPress={() => addToCart(item)}
+                    style={styles.button}
+                   onPress={() => navigation.navigate('Editar', { item })}
                 >
-                    <MaterialCommunityIcons name="cart-plus" size={24} color="#fff" />
+                    <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
@@ -104,86 +121,53 @@ const Menu = () => {
     );
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Menú</Text>
-                <View style={styles.searchBarContainer}>
-                    <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
-                    <TextInput
-                        style={styles.searchBar}
-                        placeholder="Buscar producto..."
-                        placeholderTextColor="#999"
-                        value={search}
-                        onChangeText={setSearch}
-                    />
-                </View>
-            </View>
-            
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Menú</Text>
+            <View style={styles.searchBarContainer}>
+                                <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
+                                <TextInput
+                                    style={styles.searchBar}
+                                    placeholder="Buscar producto..."
+                                    placeholderTextColor="#999"
+                                    value={search}
+                                    onChangeText={setSearch}
+                                />
+                                </View>
             {menuItems.length === 0 ? (
-                <>
-                    <View style={styles.bodyContainer}>
-                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                        No hay productos disponibles
-                        </Text>
-                    </View>
-                
-                </>
+                <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                    No hay productos disponibles
+                </Text>
             ) : (
-                <>
-                <View style={styles.bodyContainer}>
-                    <FlatList
-                        data={productsFiltered}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={renderItem}
-                        contentContainerStyle={styles.list}
-                        numColumns={2}
-                        showsVerticalScrollIndicator={false}
-                    />
-                    </View>
-                </>
+                <FlatList
+                    data={productsFiltered}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderItem}
+                    contentContainerStyle={styles.list}
+                    numColumns={2}
+                    showsVerticalScrollIndicator={false}
+                />
             )}
-        </View>
+        </SafeAreaView>
     );
 };
 
-export default Menu;
+export default AdminMenuScreen;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+        padding: 8,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 16,
         textAlign: 'center',
-        color: '#000',
-    },
-    header: {
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        justifyContent: 'flex-start',
-        height: '24%',
-        paddingTop: 50,
-        paddingHorizontal: 10,
-        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
-        //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
-    },
-    bodyContainer: {
-        width: '100%',
-        flex: 1,
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        backgroundColor: "#fff",
-        width: "100%",
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
-        marginTop: -25
+        color: '#333',
     },
     list: {
-        paddingBottom: 0,
+        paddingBottom: 16,
     },
     card: {
         flex: 1,
@@ -196,23 +180,19 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 3,
-        alignContent: 'flex-start',
-        alignItems: 'flex-start'
     },
     image: {
-        width: '100%',
+        width: 100,
         height: 100,
         borderRadius: 8,
         marginBottom: 8,
-        aspectRatio: 1.5,
-        alignSelf: 'center'
-        //resizeMode: 'contain',
-
+        resizeMode: 'cover',
     },
     name: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#333',
+        textAlign: 'center',
     },
     category: {
         fontSize: 12,
@@ -220,11 +200,10 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     price: {
-        fontSize: 22,
+        fontSize: 14,
         fontWeight: 'bold',
         color: '#BACA16',
-        marginTop: 10,
-
+        marginBottom: 8,
     },
     description: {
         fontSize: 12,
@@ -235,15 +214,8 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#BACA16',
         paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    button2: {
-        backgroundColor: '#f6c80d',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
+        paddingHorizontal: 12,
+        borderRadius: 8,
         marginTop: 10,
     },
     buttonText: {
@@ -264,6 +236,12 @@ const styles = StyleSheet.create({
         height: 200,
         marginTop: 10,
         borderRadius: 10,
+    },
+    buttons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginTop: 10,
     },
     buttons: {
         flexDirection: 'row',
@@ -297,5 +275,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
+
 
 });
