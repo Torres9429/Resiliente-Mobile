@@ -10,14 +10,13 @@ import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
-import { actualizarProducto } from "../api/menu";
+import { actualizarProducto, crearProducto } from "../api/menu";
 import { uploadImageToWasabi } from "../services/wasabi";
 
-const EditProductScreen = () => {
+const AddProductScreen = () => {
     const { logout } = useContext(AuthContext);
     const route = useRoute();
     const navigation = useNavigation();
-    const { item } = route.params;
 
     const [nombre, setNombre] = useState("");
     const [descripcion, setDescripcion] = useState("");
@@ -45,20 +44,8 @@ const EditProductScreen = () => {
         };
     }, []);
 
-    useEffect(() => {
-        if (item) {
-            setNombre(item.nombre || "");
-            setDescripcion(item.descripcion || "");
-            setPrecio(item.precio?.toString() || "");
-            setCategoria(item.categoria || "");
-            setCodigo(item.codigo || "");
-            setStatus(item.status ?? true);
-            setFoto(item.foto || "");
-            setId(item.id || null);
-        }
-    }, [item]);
 
-    const handleActualizar = async () => {
+    const handleSave = async () => {
         try {
             let fotoUrl = foto;
 
@@ -79,13 +66,13 @@ const EditProductScreen = () => {
                 foto: fotoUrl,
             };
 
-            await actualizarProducto(item.id, productoDto);
-            Alert.alert("Éxito", "Producto actualizado correctamente", [
+            await crearProducto( productoDto);
+            Alert.alert("Éxito", "Producto guardado correctamente", [
                 { text: "OK", onPress: () => navigation.goBack() },
             ]);
         } catch (error) {
             setUploading(false);
-            Alert.alert("Error", "No se pudo actualizar el producto");
+            Alert.alert("Error", "No se pudo guardar el producto");
         }
     };
 
@@ -105,9 +92,9 @@ const EditProductScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Editar producto</Text>
+                <Text style={styles.title}>Nuevo producto</Text>
                 <Text style={styles.subtitle}>
-                    Completa los campos para editar el producto.
+                    Completa los campos para guardar el producto.
                 </Text>
             </View>
             <View style={styles.bodyContainer}>
@@ -117,13 +104,6 @@ const EditProductScreen = () => {
                 >
                     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                         <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Id"
-                                value={id?.toString() || ""}
-                                editable={false}
-                            />
-
                             <Text style={styles.label}>Nombre</Text>
                             <TextInput
                                 style={styles.input}
@@ -198,7 +178,7 @@ const EditProductScreen = () => {
 
             <TouchableOpacity
                 style={[styles.button, uploading && { opacity: 0.7 }]}
-                onPress={handleActualizar}
+                onPress={handleSave}
                 disabled={uploading}
             >
                 <Text style={styles.buttonText}>{uploading ? "Guardando..." : "Guardar"}</Text>
@@ -248,7 +228,8 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: 6,
         marginTop: 12,
-        color: '#333'
+        color: '#333',
+        textAlign: 'left'
     },
     input: {
         backgroundColor: '#f0f0f0',
@@ -284,4 +265,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default EditProductScreen;
+export default AddProductScreen;

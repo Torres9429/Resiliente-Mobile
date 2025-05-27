@@ -8,15 +8,16 @@ import {
     TouchableOpacity,
     SafeAreaView,
     TextInput,
-     KeyboardAvoidingView,
+    KeyboardAvoidingView,
     Keyboard,
     Platform,
     TouchableWithoutFeedback,
+    Alert,
 } from 'react-native';
-import { obtenerTodosLosProductos } from '../api/menu';
+import { eliminarProducto, obtenerTodosLosProductos } from '../api/menu';
 import { CartContext } from '../context/CartContext';
-import {Ionicons} from '@expo/vector-icons';
-
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomModal from '../components/CustomModal';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -48,27 +49,43 @@ const AdminMenuScreen = () => {
     }, []);
 
     // filtros de búsqueda
-    const productsFiltered = menuItems.filter( product => 
+    const productsFiltered = menuItems.filter(product =>
         product.nombre.toLowerCase().includes(search.toLowerCase())
     )
-
-
-    useEffect(() => {
-        const fetchMenu = async () => {
+    
+        const handleDelete = async (id) => {
             try {
-                const response = await obtenerTodosLosProductos();
-                if (response.data.tipo === "SUCCESS") {
-                    setMenuItems(response.data.datos);
-                    console.log("Respuesta completa:", response.data);
-                } else {
-                    console.error("Error en la respuesta:", response.data.mensaje);
-                }
+                await eliminarProducto(id);
+                Alert.alert("Éxito", "Producto eliminado correctamente", [
+                    { text: "OK" },
+                ]);
             } catch (error) {
-                console.error("Error al obtener los productos:", error);
+                console.error("Error al eliminar producto:", error);
+                Alert.alert("Error", "No se pudo eliminar el producto");
             }
-        };
-        fetchMenu();
-    }, []);
+        }
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const fetchMenu = async () => {
+                try {
+                    const response = await obtenerTodosLosProductos();
+                    if (response.data.tipo === "SUCCESS") {
+                        setMenuItems(response.data.datos);
+                        console.log("Respuesta completa:", response.data);
+                    } else {
+                        console.error("Error en la respuesta:", response.data.mensaje);
+                    }
+                } catch (error) {
+                    console.error("Error al obtener los productos:", error);
+                }
+            };
+            fetchMenu();
+            return () => {
+                // Opcional: limpia estado si deseas
+            };
+        }, [])
+    );
 
     const handleToggle = (index) => {
         setExpandedIndex(index === expandedIndex ? null : index);
@@ -100,8 +117,8 @@ const AdminMenuScreen = () => {
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
                 <TouchableOpacity
-                    style={styles.button}
-                   onPress={() => navigation.navigate('Editar', { item })}
+                    style={styles.button2}
+                    onPress={() => navigation.navigate('Editar', { item })}
                 >
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -110,6 +127,9 @@ const AdminMenuScreen = () => {
                     onPress={() => handleModal(item.indicaciones?.[0].sena?.video)}
                 >
                     <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button3} onPress={() => handleDelete(item.id)}>
+                    <Ionicons name="trash" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
             <CustomModal
@@ -121,9 +141,11 @@ const AdminMenuScreen = () => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Menú</Text>
-            <View style={styles.searchBarContainer}>
+        <View style={styles.container}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Menú</Text>
+                        <View style={styles.btns}>
+                            <View style={styles.searchBarContainer}>
                                 <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
                                 <TextInput
                                     style={styles.searchBar}
@@ -132,22 +154,39 @@ const AdminMenuScreen = () => {
                                     value={search}
                                     onChangeText={setSearch}
                                 />
-                                </View>
-            {menuItems.length === 0 ? (
-                <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                    No hay productos disponibles
-                </Text>
-            ) : (
-                <FlatList
-                    data={productsFiltered}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={renderItem}
-                    contentContainerStyle={styles.list}
-                    numColumns={2}
-                    showsVerticalScrollIndicator={false}
-                />
-            )}
-        </SafeAreaView>
+                            </View>
+                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddProduct')}>
+                                <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
+                        <Text style={styles.btnText}>Agregar</Text>
+                            </TouchableOpacity>
+                        </View>
+                        
+                    </View>
+                    
+                    {menuItems.length === 0 ? (
+                        <>
+                            <View style={styles.bodyContainer}>
+                                <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                                No hay productos disponibles
+                                </Text>
+                            </View>
+                        
+                        </>
+                    ) : (
+                        <>
+                        <View style={styles.bodyContainer}>
+                            <FlatList
+                                data={productsFiltered}
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={renderItem}
+                                contentContainerStyle={styles.list}
+                                numColumns={2}
+                                showsVerticalScrollIndicator={false}
+                            />
+                            </View>
+                        </>
+                    )}
+                </View>
     );
 };
 
@@ -156,20 +195,41 @@ export default AdminMenuScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
-        padding: 8,
+        backgroundColor: '#fcfcfc',
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 16,
         textAlign: 'center',
-        color: '#333',
+        color: '#000',
+    },
+    header: {
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        justifyContent: 'flex-start',
+        height: '24%',
+        paddingTop: 50,
+        paddingHorizontal: 10,
+        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
+        //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
+    },
+    bodyContainer: {
+        width: '100%',
+        flex: 1,
+        paddingVertical: 10,
+        paddingHorizontal: 5,
+        backgroundColor: "#fcfcfc",
+        width: "100%",
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        marginTop: -25
     },
     list: {
-        paddingBottom: 16,
+        paddingBottom: 0,
     },
-    card: {
+   card: {
         flex: 1,
         backgroundColor: '#fff',
         borderRadius: 12,
@@ -180,19 +240,23 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 3,
+        alignContent: 'flex-start',
+        alignItems: 'flex-start'
     },
     image: {
-        width: 100,
+        width: '100%',
         height: 100,
         borderRadius: 8,
         marginBottom: 8,
-        resizeMode: 'cover',
+        aspectRatio: 1.5,
+        alignSelf: 'center',
+        //resizeMode: 'center',
     },
     name: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#333',
-        textAlign: 'center',
+        textAlign: 'left',
     },
     category: {
         fontSize: 12,
@@ -214,14 +278,28 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#BACA16',
         paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 8,
+        paddingHorizontal: 6,
+        borderRadius: 50,
         marginTop: 10,
     },
     buttonText: {
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 14,
+    },
+    button2: {
+        backgroundColor: '#f6c80d',
+        paddingVertical: 6,
+        paddingHorizontal: 6,
+        borderRadius: 50,
+        marginTop: 10,
+    },
+    button3: {
+        backgroundColor: '#597cff',
+        paddingVertical: 6,
+        paddingHorizontal: 6,
+        borderRadius: 50,
+        marginTop: 10,
     },
     detailsContainer: {
         alignItems: 'center',
@@ -243,11 +321,27 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 10,
     },
-    buttons: {
+    addButton: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        height: 50,
+        width: '30%',
+        backgroundColor: '#BACA16',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 10,
+        paddingHorizontal: 15,
+    },
+    btns: {
+
         width: '100%',
-        marginTop: 10,
+        justifyContent: 'space-around',
+        flexDirection: 'row',
+    },
+    btnText: {
+        textAlign: 'center',
+        fontSize: 18,
+        color: '#fff',
+        marginHorizontal: 5
     },
     searchBarContainer: {
         flexDirection: 'row',

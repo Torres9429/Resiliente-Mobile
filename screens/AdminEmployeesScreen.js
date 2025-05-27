@@ -88,13 +88,13 @@ const AdminEmployeesScreen = ({ navigation }) => {
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
                 <TouchableOpacity
-                    style={styles.button}
+                    style={styles.button2}
                     onPress={() => navigation.navigate('EditWaiter', { item })}
                 >
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={styles.button2}
+                    style={styles.button}
                     onPress={() => handleDelete(item.id)}
                 >
                     <Ionicons name="trash" size={24} color="#fff" />
@@ -159,7 +159,7 @@ export default AdminEmployeesScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fcfcfc',
     },
     title: {
         fontSize: 24,
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 10,
         paddingHorizontal: 5,
-        backgroundColor: "#fff",
+        backgroundColor: "#fcfcfc",
         width: "100%",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,

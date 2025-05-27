@@ -51,7 +51,7 @@ const SelectWaiter = ({ navigation }) => {
                     <Image
                         source={
                             item.foto
-                                ? { uri: `data:image/jpeg;base64,${item.foto}` } // Decodifica la imagen Base64
+                                ? { uri: item.foto}
                                 : require('../assets/default-avatar.png') // Imagen predeterminada si no hay foto
                         }
                         style={styles.image}
@@ -109,7 +109,7 @@ export default SelectWaiter;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fcfcfc',
     },
     title: {
         fontSize: 22,
@@ -134,18 +134,17 @@ const styles = StyleSheet.create({
     waitersContainer: {
         width: '100%',
         flex: 1,
-        padding: 20,
-        backgroundColor: "#fff",
-        width: "100%",
+        paddingVertical: 10,
+        paddingHorizontal: 5,
+        backgroundColor: "#fcfcfc",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         marginTop: -20
     },
     list: {
-        gap: 16,
+        gap: 8,
         paddingHorizontal: 5,
         paddingVertical: 5,
-        height: '100%',
     },
     card: {
         backgroundColor: '#fff',

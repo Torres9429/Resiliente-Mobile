@@ -151,7 +151,7 @@ export default Menu;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fcfcfc',
     },
     title: {
         fontSize: 24,
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 10,
         paddingHorizontal: 5,
-        backgroundColor: "#fff",
+        backgroundColor: "#fcfcfc",
         width: "100%",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,

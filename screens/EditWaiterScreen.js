@@ -2,18 +2,20 @@ import {
     View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Switch, Image,
     KeyboardAvoidingView, Keyboard, Platform, TouchableWithoutFeedback, Alert,
 } from "react-native";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect,  } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImageToWasabi } from "../services/wasabi";
 import DropDownPicker from 'react-native-dropdown-picker';
-import { crearMesero } from "../api/waiters";
+import { actualizarMesero } from "../api/waiters"; // Usa el endpoint de actualización
 import { obtenerTodasLasCondiciones } from "../api/disability";
 
 const EditWaiterScreen = () => {
     const { logout } = useContext(AuthContext);
     const navigation = useNavigation();
+    const route = useRoute();
+    const { item } = route.params;
 
     const [nombre, setNombre] = useState("");
     const [presentacion, setPresentacion] = useState("");
@@ -25,20 +27,17 @@ const EditWaiterScreen = () => {
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [items, setItems] = useState([]);
-
+    console.log('mesero: ', item);
+    
     useEffect(() => {
         const fetchCondiciones = async () => {
             try {
                 const response1 = await obtenerTodasLasCondiciones();
-                console.log('aqui si llega')
                 const response = response1.data.datos;
-                console.log(response);
-                
                 const opciones = response.map(cond => ({
                     label: cond.nombre,
                     value: cond.id,
                 }));
-                console.log(opciones)
                 setItems(opciones);
             } catch (error) {
                 console.error("Error al cargar condiciones", error);
@@ -47,6 +46,17 @@ const EditWaiterScreen = () => {
 
         fetchCondiciones();
     }, []);
+
+    useEffect(() => {
+        if (item) {
+            setNombre(item.nombre || '');
+            setEdad(item.edad ? item.edad.toString() : '');
+            setPresentacion(item.presentacion || '');
+            setStatus(item.status ?? true);
+            setFoto(item.foto || '');
+            setValue(item.condicion.id || null); 
+        }
+    }, [item]);
 
     const handleActualizar = async () => {
         if (!nombre || !edad || !presentacion || !value) {
@@ -62,7 +72,7 @@ const EditWaiterScreen = () => {
                 fotoUrl = await uploadImageToWasabi(foto);
             }
 
-            const nuevoMesero = {
+            const meseroActualizado = {
                 condicionId: parseInt(value),
                 edad: parseInt(edad),
                 foto: fotoUrl,
@@ -71,17 +81,15 @@ const EditWaiterScreen = () => {
                 status
             };
 
-            console.log('Datos a enviar:', nuevoMesero);
-            await crearMesero(nuevoMesero);
+            await actualizarMesero(item.id, meseroActualizado);
 
             setUploading(false);
-            Alert.alert("Éxito", "Mesero guardado correctamente", [
+            Alert.alert("Éxito", "Mesero actualizado correctamente", [
                 { text: "OK", onPress: () => navigation.goBack() },
             ]);
         } catch (error) {
-            console.error("Error al guardar mesero:", error);
             setUploading(false);
-            Alert.alert("Error", "No se pudo guardar el mesero");
+            Alert.alert("Error", "No se pudo actualizar el mesero");
         }
     };
 
@@ -101,9 +109,9 @@ const EditWaiterScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Agregar mesero</Text>
+                <Text style={styles.title}>Editar mesero</Text>
                 <Text style={styles.subtitle}>
-                    Completa los campos para agregar el mesero.
+                    Modifica los campos para actualizar el mesero.
                 </Text>
             </View>
             <View style={styles.bodyContainer}>
@@ -201,7 +209,7 @@ const EditWaiterScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    container: { flex: 1, backgroundColor: '#fcfcfc' },
     header: {
         flexDirection: "column",
         alignItems: "center",

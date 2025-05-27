@@ -92,7 +92,7 @@ export default CartScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fcfcfc',
     padding: 16,
   },
   title: {

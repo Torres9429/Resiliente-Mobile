@@ -201,7 +201,7 @@ const AddWaiterScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    container: { flex: 1, backgroundColor: '#fcfcfc' },
     header: {
         flexDirection: "column",
         alignItems: "center",

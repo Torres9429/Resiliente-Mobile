@@ -70,7 +70,7 @@ const UserHomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  container: { flex: 1, backgroundColor: "#fcfcfc" },
   carouselImage: {
     width: "100%",
     height: 250,
