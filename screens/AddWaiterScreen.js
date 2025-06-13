@@ -7,6 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImageToWasabi } from "../services/wasabi";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { crearMesero } from "../api/waiters";
 import { obtenerTodasLasCondiciones } from "../api/disability";
@@ -33,7 +34,7 @@ const AddWaiterScreen = () => {
                 console.log('aqui si llega')
                 const response = response1.data.datos;
                 console.log(response);
-                
+
                 const opciones = response.map(cond => ({
                     label: cond.nombre,
                     value: cond.id,
@@ -101,6 +102,9 @@ const AddWaiterScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <MaterialCommunityIcons name="chevron-left" size={40} color="#BACA16" />
+                </TouchableOpacity>
                 <Text style={styles.title}>Agregar mesero</Text>
                 <Text style={styles.subtitle}>
                     Completa los campos para agregar el mesero.
@@ -210,7 +214,8 @@ const styles = StyleSheet.create({
         height: '25%',
         paddingTop: 50,
         paddingHorizontal: 10,
-        backgroundColor: '#BACA16',
+        //backgroundColor: '#BACA16',
+        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
     },
     bodyContainer: {
         width: '100%',
@@ -232,7 +237,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
         paddingHorizontal: 10,
-        color: '#444'
+        top: 10,
+        color: '#000'
     },
     label: {
         fontSize: 16,
@@ -261,6 +267,16 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 16,
         fontWeight: "bold"
+    },
+    backButton: {
+        position: "absolute",
+        top: 45,
+        left: 20,
+        zIndex: 1,
+        borderRadius: 50,
+        padding: 5,
+        //backgroundColor: "rgba(187, 202, 22, 0.35)", // semi-transparente
+        backgroundColor: "rgba(255, 255, 255, 0.55)",
     },
     switchContainer: {
         flexDirection: 'row',

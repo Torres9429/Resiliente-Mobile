@@ -31,7 +31,7 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                             <Feather name="x" size={36} color="#BACA16" />
                         </TouchableOpacity>
                     </View>
-                    <Text style={styles.modalText}>Sigue las señas para pedir tu orden!</Text>
+                    <Text style={styles.modalText}>¡Sigue las señas para pedir tu orden!</Text>
                     <Video
                         ref={video}
                         style={styles.video}
@@ -42,6 +42,7 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                         resizeMode={ResizeMode.COVER}
                         isLooping
                         onPlaybackStatusUpdate={status => setStatus(() => status)}
+                        
                     />
                     <View style={styles.buttons}>
                         <TouchableOpacity
@@ -60,7 +61,7 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                             />
                         </TouchableOpacity>
                     </View>
-                    <Button title="Close" onPress={handleClose} />
+                    {/*<Button title="Close" onPress={handleClose} />*/}
                 </View>
             </View>
         </Modal>
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         borderRadius: 50,
         alignItems: "center",
-
+        paddingBottom: 40,
     },
     modalText: {
         marginBottom: 15,
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
     },
     video: {
         width: '80%',
-        height: 400,
+        height: 450,
         marginTop: 10,
         borderRadius: 10,
     },

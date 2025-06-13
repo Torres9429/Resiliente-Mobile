@@ -14,7 +14,7 @@ import { obtenerTodosLosProductos } from '../api/menu';
 import { CartContext } from '../context/CartContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomModal from '../components/CustomModal';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 
 
 const Menu = () => {
@@ -23,8 +23,13 @@ const Menu = () => {
     const [expandedIndex, setExpandedIndex] = useState(null);
     const { addToCart } = useContext(CartContext);
     const [modalVisible, setModalVisible] = useState(false);
-    const [videoUri, setVideoUri] = useState(null);
+    const [videoUri, setVideoUri] = useState([null]);
     const [search, setSearch] = useState('');
+
+    route = useRoute(); 
+    const {waiter} = route.params || {};
+    //console.log("Mesero recibido:", waiter);
+
 
     const video = useRef(null);
     const [status, setStatus] = useState({});
@@ -34,8 +39,8 @@ const Menu = () => {
         product.nombre.toLowerCase().includes(search.toLowerCase())
     )
 
-
-    useEffect(() => {
+    useFocusEffect(
+        React.useCallback(() => {
         const fetchMenu = async () => {
             try {
                 const response = await obtenerTodosLosProductos();
@@ -50,7 +55,30 @@ const Menu = () => {
             }
         };
         fetchMenu();
-    }, []);
+    }, []));
+    /*useEffect(() => {
+  const interval = setInterval(() => {
+    fetchMenu(); // Llama a tu función
+  }, 9000); // Cada 5 segundos (ajústalo según lo necesario)
+  const fetchMenu = async () => {
+            try {
+                const response = await obtenerTodosLosProductos();
+                if (response.data.tipo === "SUCCESS") {
+                    setMenuItems(response.data.datos);
+                    console.log("Respuesta completa:", response.data);
+                } else {
+                    console.error("Error en la respuesta:", response.data.mensaje);
+                }
+            } catch (error) {
+                console.error("Error al obtener los productos:", error);
+            }
+        };
+        fetchMenu()
+  return () => clearInterval(interval); // Limpia el intervalo al desmontar
+}, []);*/
+
+    
+
 
     const handleToggle = (index) => {
         setExpandedIndex(index === expandedIndex ? null : index);
@@ -60,6 +88,10 @@ const Menu = () => {
         setVideoUri(video);
     }
 
+    const handleAddToCart = (item) => {
+        addToCart(item);
+        alert('Producto agregado al carrito');
+    };
 
     const renderItem = ({ item, index }) => (
         <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('Detalles', { item })}>
@@ -84,13 +116,13 @@ const Menu = () => {
                 <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
                 <TouchableOpacity
                     style={styles.button2}
-                    onPress={() => addToCart(item)}
+                    onPress={() => handleAddToCart(item)}
                 >
                     <MaterialCommunityIcons name="cart-plus" size={24} color="#fff" />
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handleModal(item.indicaciones?.[0].sena?.video)}
+                    onPress={() => handleModal(item.sena?.video)}
                 >
                     <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
                 </TouchableOpacity>

@@ -8,26 +8,45 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import { CartContext } from '../context/CartContext'; // Ajusta la ruta si es necesario
+import { CartContext } from '../context/CartContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomModal from '../components/CustomModal';
 
 const CartScreen = () => {
-  const { cart, removeFromCart } = useContext(CartContext);
+  const { cart, removeFromCart, addToCart } = useContext(CartContext);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [videoUri, setVideoUri] = useState(null);
 
+  // Calcula el total considerando la cantidad de cada producto
   const getTotal = () => {
-    return cart.reduce((sum, item) => sum + item.precio, 0).toFixed(2);
+    return cart.reduce((sum, item) => sum + (item.precio * (item.cantidad || 1)), 0).toFixed(2);
   };
+
   const handleModal = (video) => {
     setModalVisible(true);
     setVideoUri(video);
-  }
+  };
+
+  // Nuevo: función para restar cantidad
+  const decreaseQuantity = (item) => {
+    if (item.cantidad > 1) {
+      // Restar 1 a la cantidad
+      addToCart({ ...item, cantidad: -1 });
+    } else {
+      // Si es 1, eliminar del carrito
+      removeFromCart(item.id);
+    }
+  };
+
+  // Nuevo: función para sumar cantidad
+  const increaseQuantity = (item) => {
+    addToCart({ ...item, cantidad: 1 });
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
+      {/* Foto a la izquierda */}
       <Image
         source={
           item.foto
@@ -36,31 +55,52 @@ const CartScreen = () => {
         }
         style={styles.image}
       />
-      <View style={styles.info}>
-        <Text style={styles.name}>{item.nombre}</Text>
+      {/* Info a la derecha */}
+      <View style={styles.infoSection}>
+        
+        <View style={styles.actionsRow}>
+          <Text style={styles.name}>{item.nombre}</Text>
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => removeFromCart(item.id)}
+          >
+            <Ionicons name="trash" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handleModal(item.indicaciones?.[0]?.sena?.video)}
+          >
+            <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.category}>{item.categoria}</Text>
+        <View style={styles.counterRowPrice}>
+          <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
+          <View style={styles.counterRow}>
+            <TouchableOpacity
+              style={styles.counterButton}
+              onPress={() => decreaseQuantity(item)}
+            >
+              <Ionicons name="remove" size={20} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.counterText}>{item.cantidad}</Text>
+            <TouchableOpacity
+              style={styles.counterButton}
+              onPress={() => increaseQuantity(item)}
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+        
 
-      </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%', alignItems: 'center', }}>
-        <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
-        <TouchableOpacity
-          style={styles.removeButton}
-          onPress={() => removeFromCart(item.id)}
-        >
-          <Ionicons name="trash" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handleModal(item.indicaciones?.[0].sena?.video)}
-        >
-          <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
       <CustomModal
         visible={modalVisible}
         videoUri={videoUri}
         onClose={() => setModalVisible(false)}
       />
-    </View >
+    </View>
   );
 
   return (
@@ -72,11 +112,9 @@ const CartScreen = () => {
         <>
           <FlatList
             data={cart}
-            key={`columns-${2}`}
-            keyExtractor={(item, index) => `${item.id}-${index}`}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
-            numColumns={2}
             showsVerticalScrollIndicator={false}
           />
           <View style={styles.totalContainer}>
@@ -89,6 +127,7 @@ const CartScreen = () => {
 };
 
 export default CartScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -105,20 +144,8 @@ const styles = StyleSheet.create({
   list: {
     paddingBottom: 16,
   },
-  /*card: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
-  },*/
   card: {
-    flex: 1,
+    flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 10,
@@ -128,48 +155,84 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 2,
+    justifyContent: 'space-between',
+  },
+  infoSection: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: 'center',
+    paddingVertical: 8,
+    flexDirection: 'column',
   },
   image: {
-    width: '100%',
-    height: 100,
+    width: 90,
+    height: 90,
     borderRadius: 8,
-    marginBottom: 8,
-    aspectRatio: 1.5,
-    alignSelf: 'center'
-    //resizeMode: 'contain',
-
+    marginLeft: 8,
+    resizeMode: 'cover',
+    backgroundColor: '#eee',
   },
   name: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-  },
-  category: {
-    fontSize: 12,
-    color: '#777',
-    marginBottom: 4,
+    width: '50%',
   },
   price: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#BACA16',
-    marginTop: 10,
-
+    //color: '#BACA16',
+    marginVertical: 4,
   },
-  info: {
+  category: {
+        fontSize: 16,
+        color: '#777',
+        marginBottom: 4,
+    },
+  counterRowPrice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  counterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 6,
+    justifyContent: 'flex-end',
     flex: 1,
+  },
+  counterButton: {
+    backgroundColor: '#BACA16',
+    borderRadius: 20,
+    padding: 4,
+    marginHorizontal: 4.5,
+  },
+  counterText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    minWidth: 32,
+    textAlign: 'center',
+    color: '#333',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
   },
   removeButton: {
     backgroundColor: '#f6c80d',
     paddingVertical: 6,
     paddingHorizontal: 6,
     borderRadius: 50,
-    marginTop: 10,
+    marginRight: 10,
   },
-  removeButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 12,
+  button: {
+    backgroundColor: '#597cff',
+    //backgroundColor: '#BACA16',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRadius: 50,
   },
   totalContainer: {
     paddingTop: 12,
@@ -188,17 +251,5 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginTop: 32,
-  },
-  button: {
-    backgroundColor: '#BACA16',
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderRadius: 50,
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
   },
 });

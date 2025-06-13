@@ -6,8 +6,19 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
 
   const addToCart = (product) => {
-    setCart([...cart, product]);
-    alert('Producto agregado al carrito');
+    setCart(prevCart => {
+      const existing = prevCart.find(item => item.id === product.id);
+      if (existing) {
+        return prevCart.map(item =>
+          item.id === product.id
+            ? { ...item, cantidad: (item.cantidad || 1) + (product.cantidad || 1) }
+            : item
+        );
+      } else {
+        return [...prevCart, { ...product, cantidad: product.cantidad || 1 }];
+      }
+    });
+    //alert('Producto agregado al carrito');
   };
 
   const removeFromCart = (productId) => {

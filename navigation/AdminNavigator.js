@@ -8,6 +8,7 @@ import AdminSignsScreen from "../screens/AdminSignsScreen";
 import AdminEmployeesScreen from "../screens/AdminEmployeesScreen";
 import MenuStack from "./MenuStack";
 import EmployeesStack from "./EmployeesStack";
+import SignStack from "./SignStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -32,7 +33,7 @@ const AdminNavigator = () => {
     />
     <Tab.Screen 
       name="Señas" 
-      component={AdminSignsScreen} 
+      component={SignStack} 
       options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="hand-clap" size={24} color={color} /> }} 
     />
     <Tab.Screen 

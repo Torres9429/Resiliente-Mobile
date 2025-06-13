@@ -2,109 +2,75 @@ import {
     View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Switch, Image,
     KeyboardAvoidingView, Keyboard, Platform, TouchableWithoutFeedback, Alert,
 } from "react-native";
-import { useContext, useState, useEffect, } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
-import { uploadImageToWasabi } from "../services/wasabi";
-import DropDownPicker from 'react-native-dropdown-picker';
-import { actualizarMesero } from "../api/waiters";
-import { obtenerTodasLasCondiciones } from "../api/disability";
+import { uploadImageToWasabi, uploadVideoToWasabi } from "../services/wasabi";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {ResizeMode, Video } from 'expo-av';
+import { crearSena } from "../api/sign";
 
-const EditWaiterScreen = () => {
+const AddSignScreen = () => {
     const { logout } = useContext(AuthContext);
     const navigation = useNavigation();
-    const route = useRoute();
-    const { item } = route.params;
 
     const [nombre, setNombre] = useState("");
-    const [presentacion, setPresentacion] = useState("");
-    const [edad, setEdad] = useState("");
     const [status, setStatus] = useState(true);
-    const [foto, setFoto] = useState("");
+    const [video, setVideo] = useState("");
     const [uploading, setUploading] = useState(false);
 
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [items, setItems] = useState([]);
-    console.log('mesero: ', item);
 
-    useEffect(() => {
-        const fetchCondiciones = async () => {
-            try {
-                const response1 = await obtenerTodasLasCondiciones();
-                const response = response1.data.datos;
-                const opciones = response.map(cond => ({
-                    label: cond.nombre,
-                    value: cond.id,
-                }));
-                setItems(opciones);
-            } catch (error) {
-                console.error("Error al cargar condiciones", error);
-            }
-        };
-
-        fetchCondiciones();
-    }, []);
-
-    useEffect(() => {
-        if (item) {
-            setNombre(item.nombre || '');
-            setEdad(item.edad ? item.edad.toString() : '');
-            setPresentacion(item.presentacion || '');
-            setStatus(item.status ?? true);
-            setFoto(item.foto || '');
-            setValue(item.condicion.id || null);
-        }
-    }, [item]);
 
     const handleActualizar = async () => {
-        if (!nombre || !edad || !presentacion || !value) {
+        if (!nombre || !video) {
             Alert.alert("Campos incompletos", "Por favor, completa todos los campos obligatorios.");
             return;
         }
 
         try {
             setUploading(true);
-            let fotoUrl = foto;
+            let videoUrl = video;
 
-            if (foto && !foto.startsWith('http')) {
-                fotoUrl = await uploadImageToWasabi(foto);
+            if (video && !video.startsWith('http')) {
+                videoUrl = await uploadVideoToWasabi(video);
             }
 
-            const meseroActualizado = {
-                condicionId: parseInt(value),
-                edad: parseInt(edad),
-                foto: fotoUrl,
+            const nuevaSena = {
+                video: videoUrl,
                 nombre,
-                presentacion,
                 status
             };
 
-            await actualizarMesero(item.id, meseroActualizado);
+            console.log('Datos a enviar:', nuevaSena);
+            await crearSena(nuevaSena);
 
             setUploading(false);
-            Alert.alert("Éxito", "Mesero actualizado correctamente", [
+            Alert.alert("Éxito", "Seña guardada correctamente", [
                 { text: "OK", onPress: () => navigation.goBack() },
             ]);
         } catch (error) {
+            console.error("Error al guardar seña:", error);
             setUploading(false);
-            Alert.alert("Error", "No se pudo actualizar el mesero");
+            Alert.alert("Error", "No se pudo guardar la seña. Por favor, inténtalo de nuevo más tarde.");
         }
     };
 
-    const handleSelectPhoto = async () => {
+    const handleSelectVideo = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['videos'],
             allowsEditing: true,
-            aspect: [4, 3],
+            aspect: [9, 16],
             quality: 1,
         });
 
         if (!result.canceled) {
-            setFoto(result.assets[0].uri);
+            setVideo(result.assets[0].uri);
         }
+        
     };
 
     return (
@@ -113,9 +79,9 @@ const EditWaiterScreen = () => {
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                     <MaterialCommunityIcons name="chevron-left" size={40} color="#BACA16" />
                 </TouchableOpacity>
-                <Text style={styles.title}>Editar mesero</Text>
+                <Text style={styles.title}>Agregar seña</Text>
                 <Text style={styles.subtitle}>
-                    Modifica los campos para actualizar el mesero.
+                    Completa los campos para agregar la seña.
                 </Text>
             </View>
             <View style={styles.bodyContainer}>
@@ -129,46 +95,9 @@ const EditWaiterScreen = () => {
                                 <Text style={styles.label}>Nombre</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Nombre"
+                                    placeholder="Nombre de la seña"
                                     value={nombre}
                                     onChangeText={setNombre}
-                                />
-                            </View>
-                            <View style={{ zIndex: 1000 }}>
-                                <Text style={styles.label}>Edad</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Edad"
-                                    value={edad}
-                                    onChangeText={setEdad}
-                                    keyboardType="number-pad"
-                                />
-                            </View>
-                            <View style={{ zIndex: 1000 }}>
-                                <Text style={styles.label}>Presentación</Text>
-                                <TextInput
-                                    style={[styles.input, { height: 70 }]}
-                                    placeholder="Presentación"
-                                    value={presentacion}
-                                    onChangeText={setPresentacion}
-                                    multiline
-                                />
-                            </View>
-                            <View style={{ zIndex: 1000 }}>
-                                <Text style={styles.label}>Condición</Text>
-                                <DropDownPicker
-                                    open={open}
-                                    value={value}
-                                    items={items}
-                                    setOpen={setOpen}
-                                    setValue={setValue}
-                                    setItems={setItems}
-                                    placeholder="Selecciona..."
-                                    style={styles.dropdown}
-                                    dropDownContainerStyle={styles.dropdownContainer}
-                                    textStyle={styles.dropdownText}
-                                    listMode="SCROLLVIEW"
-                                    modalProps={{ animationType: 'slide' }}
                                 />
                             </View>
                             <View style={{ zIndex: 500 }}>
@@ -184,17 +113,19 @@ const EditWaiterScreen = () => {
                                 </View>
                             </View>
                             <View style={{ zIndex: 500 }}>
-                                <Text style={styles.label}>Foto</Text>
+                                <Text style={styles.label}>video</Text>
                                 <TouchableOpacity
                                     style={[styles.input, { justifyContent: 'center', alignItems: 'center' }]}
-                                    onPress={handleSelectPhoto}
+                                    onPress={handleSelectVideo}
                                 >
                                     <Text style={{ color: '#888' }}>
-                                        {foto ? "Cambiar foto" : "Seleccionar foto"}
+                                        {video ? "Cambiar video" : "Seleccionar video"}
                                     </Text>
                                 </TouchableOpacity>
-                                {foto && (
-                                    <Image source={{ uri: foto }} style={styles.imagePreview} />
+                                {video && (
+                                    <Video source={{ uri: video }} style={styles.videoPreview}
+                                    resizeMode={ResizeMode.COVER} 
+                                    useNativeControls/>
                                 )}
                             </View>
                         </ScrollView>
@@ -245,8 +176,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
         paddingHorizontal: 10,
-        color: '#000',
         top: 10,
+        color: '#000'
     },
     label: {
         fontSize: 16,
@@ -291,14 +222,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 12,
     },
-    imagePreview: {
-        width: 120,
-        height: 120,
+    videoPreview: {
+       width: '50%',              // ocupa todo el ancho disponible
+       maxWidth: 360,
         borderRadius: 10,
         marginTop: 10,
         alignSelf: 'center',
         borderWidth: 1,
-        borderColor: '#ccc'
+        borderColor: '#ccc',
+        aspectRatio: 9/16,
     },
     dropdown: {
         borderColor: '#ddd',
@@ -314,4 +246,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default EditWaiterScreen;
+export default AddSignScreen;

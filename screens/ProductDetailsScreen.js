@@ -18,6 +18,8 @@ const ProductDetailsScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [videoUri, setVideoUri] = useState(null);
 
+    console.log('product', item);
+    
     const handleModal = (video) => {
         setModalVisible(true);
         setVideoUri(video);
@@ -32,7 +34,7 @@ const ProductDetailsScreen = () => {
                 <Image
                     source={{ uri: item?.foto }}
                     style={styles.foto}
-                    resizeMode="contain"
+                    resizeMode="cover"
                     onLoad={(e) => {
                         const { width, height } = e.nativeEvent.source;
                         console.log(`Imagen original: ${width}x${height}`);

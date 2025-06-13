@@ -82,7 +82,7 @@ const AdminMenuScreen = () => {
             };
             fetchMenu();
             return () => {
-                // Opcional: limpia estado si deseas
+                // Opcional: limpiar estado 
             };
         }, [])
     );

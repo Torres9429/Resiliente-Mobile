@@ -7,11 +7,14 @@ import {
     Alert,
 } from "react-native";
 import { useContext, useState, useEffect } from "react";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AuthContext } from "../context/AuthContext";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { actualizarProducto, crearProducto } from "../api/menu";
 import { uploadImageToWasabi } from "../services/wasabi";
+import DropDownPicker from 'react-native-dropdown-picker';
+import { obtenerTodasLasSenas } from "../api/sign";
 
 const AddProductScreen = () => {
     const { logout } = useContext(AuthContext);
@@ -29,6 +32,11 @@ const AddProductScreen = () => {
     const [keyBoardVisible, setKeyBoardVisible] = useState(false);
     const [uploading, setUploading] = useState(false);
 
+    const [addSign, setAddSign] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState(null);
+    const [items, setItems] = useState([]);
+
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
             setKeyBoardVisible(true);
@@ -45,6 +53,27 @@ const AddProductScreen = () => {
     }, []);
 
 
+    useEffect(() => {
+            const fetchSenas = async () => {
+                try {
+                    const response1 = await obtenerTodasLasSenas();
+                    console.log('aqui si llega')
+                    const response = response1.data.datos;
+                    console.log(response);
+    
+                    const opciones = response.map(sign => ({
+                        label: sign.nombre,
+                        value: sign.id,
+                    }));
+                    console.log(opciones)
+                    setItems(opciones);
+                } catch (error) {
+                    console.error("Error al cargar condiciones", error);
+                }
+            };
+    
+            fetchSenas();
+        }, []);
     const handleSave = async () => {
         try {
             let fotoUrl = foto;
@@ -66,7 +95,7 @@ const AddProductScreen = () => {
                 foto: fotoUrl,
             };
 
-            await crearProducto( productoDto);
+            await crearProducto(productoDto);
             Alert.alert("Éxito", "Producto guardado correctamente", [
                 { text: "OK", onPress: () => navigation.goBack() },
             ]);
@@ -92,6 +121,9 @@ const AddProductScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <MaterialCommunityIcons name="chevron-left" size={40} color="#BACA16" />
+                </TouchableOpacity>
                 <Text style={styles.title}>Nuevo producto</Text>
                 <Text style={styles.subtitle}>
                     Completa los campos para guardar el producto.
@@ -170,6 +202,48 @@ const AddProductScreen = () => {
                             {foto ? (
                                 <Image source={{ uri: foto }} style={styles.imagePreview} />
                             ) : null}
+                            <TouchableOpacity style={[styles.button, { justifyContent: 'center', alignItems: 'center', backgroundColor: "#597cff" }]}
+                                onPress={() => setAddSign(!addSign)}
+                            >
+                                <Text style={{ color: '#888', textAlign: 'center', marginTop: 10 }}>
+                                    {addSign ? "Quitar seña" : "Agregar seña"}
+                                </Text>
+                            </TouchableOpacity>
+                            {addSign && (
+                                <View>
+                                    <Text style={styles.label}>Agregar seña (opcional)</Text>
+                                    <DropDownPicker
+                                        open={open}
+                                        value={value}
+                                        items={items}
+                                        setOpen={setOpen}
+                                        setValue={setValue}
+                                        setItems={setItems}
+                                        placeholder="Selecciona..."
+                                        style={styles.dropdown}
+                                        dropDownContainerStyle={styles.dropdownContainer}
+                                        textStyle={styles.dropdownText}
+                                        listMode="SCROLLVIEW"
+                                        modalProps={{ animationType: 'slide' }}
+                                        ArrowDownIconComponent={styles => (
+                                            <MaterialCommunityIcons name="chevron-down" size={24} color="#BACA16"  {...styles} />
+                                        )}
+                                        ArrowUpIconComponent={styles => (
+                                            <MaterialCommunityIcons name="chevron-up" size={24} color="#BACA16" {...styles} />
+                                        )}
+                                        arrowIconContainerStyle={{ marginRight: 15, height: 40, width: 40}}
+                                        labelStyle={{ color: '#bbb', fontSize: 16 }}
+                                        selectedItemLabelStyle={{ color: '#000', fontSize: 16 }}
+                                        searchable={true}
+                                        searchPlaceholder="Buscar..."
+                                        searchPlaceholderTextColor="#888"
+                                        searchError={() => <Text style={{ color: '#BACA16' }}>No se encontraron resultados</Text>}
+                                        searchStyle={{ color: '#000' }}
+                                        searchTextInputStyle={{ color: '#000' }}
+
+                                    />
+                                </View>
+                            )}
 
                         </ScrollView>
                     </TouchableWithoutFeedback>
@@ -197,7 +271,8 @@ const styles = StyleSheet.create({
         height: '25%',
         paddingTop: 50,
         paddingHorizontal: 10,
-        backgroundColor: '#BACA16',
+        //backgroundColor: '#BACA16',
+        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
         color: '#fff',
         // experimental_backgroundImage is not supported, so remove it or replace with something else if needed
     },
@@ -219,9 +294,10 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 16,
         marginBottom: 20,
+        top: 10,
         textAlign: 'center',
         paddingHorizontal: 10,
-        color: '#444'
+        color: '#000'
     },
     label: {
         fontSize: 16,
@@ -248,7 +324,16 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
-
+    backButton: {
+        position: "absolute",
+        top: 45,
+        left: 20,
+        zIndex: 1,
+        borderRadius: 50,
+        padding: 5,
+        //backgroundColor: "rgba(187, 202, 22, 0.35)", // semi-transparente
+        backgroundColor: "rgba(255, 255, 255, 0.55)",
+    },
     switchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -262,7 +347,22 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         borderWidth: 1,
         borderColor: '#ccc'
-    }
+    },
+    dropdown: {
+        borderColor: '#ddd',
+        backgroundColor: '#f0f0f0',
+        minHeight: 45,
+        borderRadius: 10,
+        paddingHorizontal: 14,
+    },
+    dropdownContainer: {
+        borderColor: '#ddd',
+        backgroundColor: '#f0f0f0',
+    },
+    dropdownText: {
+        fontSize: 16,
+        color: '#000',
+    },
 });
 
 export default AddProductScreen;

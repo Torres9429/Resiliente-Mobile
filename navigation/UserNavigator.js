@@ -17,12 +17,17 @@ const UserNavigator = () => (
     <Tab.Screen 
       name="Ordenar" 
       component={UserStack} 
-      options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cupcake" size={24} color={color} /> }} 
+      options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="food" size={24} color={color} /> }} 
     />
     <Tab.Screen 
       name="Carrito" 
       component={CartScreen} 
       options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cart" size={24} color={color} /> }} 
+    />
+    <Tab.Screen 
+      name="Learn" 
+      component={CartScreen} 
+      options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="hand-clap" size={24} color={color} /> }} 
     />
   </Tab.Navigator>
 );

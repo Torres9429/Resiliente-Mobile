@@ -12,6 +12,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { actualizarProducto } from "../api/menu";
 import { uploadImageToWasabi } from "../services/wasabi";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const EditProductScreen = () => {
     const { logout } = useContext(AuthContext);
@@ -105,6 +106,9 @@ const EditProductScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <MaterialCommunityIcons name="chevron-left" size={40} color="#BACA16" />
+                </TouchableOpacity>
                 <Text style={styles.title}>Editar producto</Text>
                 <Text style={styles.subtitle}>
                     Completa los campos para editar el producto.
@@ -217,9 +221,9 @@ const styles = StyleSheet.create({
         height: '25%',
         paddingTop: 50,
         paddingHorizontal: 10,
-        backgroundColor: '#BACA16',
+        //backgroundColor: '#BACA16',
+        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
         color: '#fff',
-        // experimental_backgroundImage is not supported, so remove it or replace with something else if needed
     },
     bodyContainer: {
         width: '100%',
@@ -241,7 +245,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
         paddingHorizontal: 10,
-        color: '#444'
+        color: '#000',
+        top: 10,
     },
     label: {
         fontSize: 16,
@@ -267,7 +272,16 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
-
+    backButton: {
+        position: "absolute",
+        top: 45,
+        left: 20,
+        zIndex: 1,
+        borderRadius: 50,
+        padding: 5,
+        //backgroundColor: "rgba(187, 202, 22, 0.35)", // semi-transparente
+        backgroundColor: "rgba(255, 255, 255, 0.55)",
+    },
     switchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
