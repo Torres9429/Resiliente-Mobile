@@ -1,21 +1,36 @@
 import { useState, useContext } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"; // Importación corregida
-
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 const LoginScreen = () => {
-  const { login } = useContext(AuthContext);
-  const [username, setUsername] = useState("");
+  const { login, error: authError, isLoading } = useContext(AuthContext);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      setErrorMessage("Por favor, ingrese un correo y contraseña");
+      return;
+    }
+    setErrorMessage(null);
+    try {
+      console.log("email: ", email);
+      console.log("password: ", password);
+      await login(email, password);
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      setErrorMessage(error.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
-
-      <View style={styles.headerLogo} >
+      <View style={styles.headerLogo}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="chevron-left" size={40} color="white" />
         </TouchableOpacity>
@@ -24,12 +39,13 @@ const LoginScreen = () => {
       <Text style={styles.title}>Bienvenido</Text>
       <View style={styles.inputContainer}>
         <MaterialCommunityIcons name="email" size={24} color="#BACA16" style={styles.icon} />
-        {/*<Ionicons name="person-circle-outline" size={24} color="#BACA16" style={{ marginBottom: 20 }} />*/}
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
           autoCapitalize="none"
-          onChangeText={(text) => setUsername(text.trim().toLowerCase())}
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
         />
       </View>
 
@@ -39,23 +55,43 @@ const LoginScreen = () => {
           style={styles.input}
           placeholder="Contraseña"
           secureTextEntry={!showPassword}
+          value={password}
           onChangeText={setPassword}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Ionicons name={showPassword ? "eye" : "eye-off"} size={24} color="#aaa" style={styles.icon} />
-              </TouchableOpacity>
+          <Ionicons name={showPassword ? "eye" : "eye-off"} size={24} color="#aaa" style={styles.icon} />
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => login(username, password)}>
-        <Text style={styles.buttonText}>Iniciar Sesión</Text>
+
+      {(errorMessage || authError) && (
+        <Text style={styles.errorText}>{errorMessage || authError}</Text>
+      )}
+      <TouchableOpacity 
+        style={[styles.button, isLoading && styles.buttonDisabled]} 
+        onPress={handleSubmit}
+        disabled={isLoading}
+      >
+        <Text style={styles.buttonText}>
+          {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+        </Text>
       </TouchableOpacity>
     </View>
-
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fcfcfc", width: "100%", },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  container: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    backgroundColor: "#fcfcfc", 
+    width: "100%" 
+  },
+  title: { 
+    fontSize: 24, 
+    fontWeight: "bold", 
+    marginBottom: 20 
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -83,14 +119,6 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     color: '#333',
-    /* width: "80%", 
-    height: 40, 
-    borderWidth: 1, 
-    borderColor: "#ccc",
-    marginVertical: 10, 
-    padding: 12, 
-    backgroundColor: "#fff", 
-    borderRadius: 20  */
   },
   icon: {
     marginRight: 10,
@@ -100,29 +128,34 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 25,
-    marginTop: 10
+    marginTop: 10,
+    minWidth: 200,
+    alignItems: 'center',
   },
-  buttonText: { color: "white", fontSize: 18, fontWeight: "bold" },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  buttonText: { 
+    color: "white", 
+    fontSize: 18, 
+    fontWeight: "bold" 
+  },
   headerLogo: {
     width: "115%",
     height: '25%',
-    //backgroundColor: "#51BBF5",
     experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
     justifyContent: "center",
     alignItems: "center",
     borderBottomEndRadius: '50%',
     borderBottomStartRadius: '50%',
-    //borderRadius: '50%',
     marginBottom: 20,
     position: "absolute",
     top: 0,
-
   },
   logo: {
     width: 150,
     height: 150,
     marginTop: 20,
-
   },
   backButton: {
     marginRight: 10,
@@ -130,6 +163,11 @@ const styles = StyleSheet.create({
     top: 50,
     left: 50,
     bottom: 5,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
+    textAlign: "center",
   },
 });
 

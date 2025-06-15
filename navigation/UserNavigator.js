@@ -4,6 +4,7 @@ import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import UserStack from "./UserStack";
 import SelectWaiter from "../screens/SelectWaiter";
 import CartScreen from "../screens/CartScreen";
+import LearnScreen from "../screens/LearnScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,7 +27,7 @@ const UserNavigator = () => (
     />
     <Tab.Screen 
       name="Learn" 
-      component={CartScreen} 
+      component={LearnScreen} 
       options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="hand-clap" size={24} color={color} /> }} 
     />
   </Tab.Navigator>

@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { API_BASE_URL } from '@env';
-/* import { getToken } from '../api/authService';
+import { getToken } from './authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
- */
+ 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -19,16 +19,14 @@ export const apiMultipart = axios.create({
   transformRequest: (data) => data,
 });
 
-/* 
+
 api.interceptors.request.use(
   async (config) => {
-    //const token = await getToken();
-    const token = await AsyncStorage.getItem("jwt"); // Cambia esto por el nombre correcto de tu token
-    console.log("Token obtenido:", token); // Muestra el token obtenido
-    if (token) {        
+    const token = await getToken();
+    console.log('Token obtenido:', token);
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
     return config;
   },
   (error) => {
@@ -37,14 +35,14 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => {
-    //console.log("Respuesta de la API:", response);
-    return response;
-  },
-  (error) => {
-    //console.error("Error en la respuesta de la API:", error.response ? error.response.data : error.message);
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      // Manejar error de autenticación
+      console.error('Error de autenticación:', error);
+    }
     return Promise.reject(error);
   }
-); */
+); 
 
 export default api;
