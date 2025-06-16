@@ -32,10 +32,11 @@ const LoginScreen = () => {
     <View style={styles.container}>
       <View style={styles.headerLogo}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <MaterialCommunityIcons name="chevron-left" size={40} color="white" />
+          <MaterialCommunityIcons name="chevron-left" size={40} color="#BACA16" />
         </TouchableOpacity>
         <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
       </View>
+      <View style={styles.bodyContainer}> 
       <Text style={styles.title}>Bienvenido</Text>
       <View style={styles.inputContainer}>
         <MaterialCommunityIcons name="email" size={24} color="#BACA16" style={styles.icon} />
@@ -75,6 +76,7 @@ const LoginScreen = () => {
           {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
         </Text>
       </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -133,7 +135,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonDisabled: {
-    opacity: 0.7,
+    opacity: 0.8,
+    backgroundColor: "#9BA812",
   },
   buttonText: { 
     color: "white", 
@@ -142,12 +145,12 @@ const styles = StyleSheet.create({
   },
   headerLogo: {
     width: "115%",
-    height: '25%',
+    height: '30%',
     experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
     justifyContent: "center",
     alignItems: "center",
-    borderBottomEndRadius: '50%',
-    borderBottomStartRadius: '50%',
+    //borderBottomEndRadius: '50%',
+    //borderBottomStartRadius: '50%',
     marginBottom: 20,
     position: "absolute",
     top: 0,
@@ -157,17 +160,44 @@ const styles = StyleSheet.create({
     height: 150,
     marginTop: 20,
   },
-  backButton: {
+  /*backButton: {
     marginRight: 10,
     position: "absolute",
     top: 50,
     left: 50,
     bottom: 5,
-  },
+  },*/
+  backButton: {
+    position: "absolute",
+    top: 45,
+    left: 50,
+    zIndex: 1,
+    borderRadius: 50,
+    padding: 5,
+    //backgroundColor: "rgba(187, 202, 22, 0.35)", // semi-transparente
+    backgroundColor: "rgba(255, 255, 255, 0.55)",
+},
   errorText: {
     color: "red",
     marginBottom: 10,
     textAlign: "center",
+  },
+  infoText: {
+    color: "#BACA16",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  bodyContainer: {
+    flex: 1,
+    paddingVertical: 50,
+    paddingHorizontal: 5,
+    backgroundColor: "#fcfcfc",
+    width: "100%",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    marginTop: "60%",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
 });
 

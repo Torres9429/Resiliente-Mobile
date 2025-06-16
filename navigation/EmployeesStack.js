@@ -8,15 +8,18 @@ import AdminMenuScreen from '../screens/AdminMenuScreen';
 import AddWaiterScreen from '../screens/AddWaiterScreen';
 import AdminEmployeesScreen from '../screens/AdminEmployeesScreen';
 import EditWaiterScreen from '../screens/EditWaiterScreen';
+import EmployeeHomeScreen from '../screens/EmployeeHomeScreen';
+import AddProductScreen from '../screens/AddProductScreen';
+import EditProductScreen from '../screens/EditProductScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function EmployeesStack() {
   return (
-    <Stack.Navigator initialRouteName='Waiter'>
-      <Stack.Screen name="Waiter" component={AdminEmployeesScreen} options={{headerShown: false}} />
-      <Stack.Screen name="AddWaiter" component={AddWaiterScreen} options={{headerShown: false}} />
-      <Stack.Screen name="EditWaiter" component={EditWaiterScreen} options={{headerShown: false}} />
+    <Stack.Navigator initialRouteName='EmployeeScreen'>
+      <Stack.Screen name="EmployeeScreen" component={EmployeeHomeScreen} options={{headerShown: false}} />
+      <Stack.Screen name="AddProduct" component={AddProductScreen} options={{headerShown: false}} />
+      <Stack.Screen name="EditProduct" component={EditProductScreen} options={{headerShown: false}} />
     </Stack.Navigator>
   );
 }

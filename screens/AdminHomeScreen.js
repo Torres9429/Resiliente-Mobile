@@ -42,19 +42,19 @@ const AdminHomeScreen = () => {
     {
       title: 'Productos',
       icon: 'food',
-      screen: 'Products',
+      screen: 'Menú',
       color: '#7B8FA1',
     },
     {
       title: 'Meseros',
       icon: 'account-group',
-      screen: 'Waiters',
+      screen: 'Empleados',
       color: '#567189',
     },
     {
       title: 'Señas',
-      icon: 'hand',
-      screen: 'Signs',
+      icon: 'hand-clap',
+      screen: 'Señas',
       color: '#607EAA',
     },
     {
@@ -90,10 +90,11 @@ const AdminHomeScreen = () => {
             </View>
           </View>
           <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={24} color="#fff" />
+            <MaterialCommunityIcons name="logout" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
+      <View style={styles.bodyContainer}>
 
       {/* Stats Cards */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsContainer}>
@@ -128,6 +129,7 @@ const AdminHomeScreen = () => {
         ))}
       </View>
     </View>
+    </View>
   );
 };
 
@@ -137,12 +139,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#BACA16',
-    paddingTop: 90,
-    paddingBottom: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
+    flexDirection: "column",
+    width: "100%",
+    justifyContent: 'flex-end',
+    height: '20%',
+    paddingBottom: 50,
+    paddingHorizontal: 10,
+    experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
+    //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
+},
+bodyContainer: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    backgroundColor: "#fcfcfc",
+    width: "100%",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    marginTop: -35,
+},
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',

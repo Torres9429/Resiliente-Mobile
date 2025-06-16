@@ -2,8 +2,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import Admin2 from "../screens/Admin2";
 import EmployeeHomeScreen from "../screens/EmployeeHomeScreen";
+import AddProductScreen from "../screens/AddProductScreen";
+import EmployeesStack from "./EmployeesStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -14,13 +15,13 @@ const EmployeeNavigator = () => {
     <Tab.Navigator screenOptions={{ headerShown: true }}>
       <Tab.Screen 
         name="Inicio" 
-        component={EmployeeHomeScreen} 
-        options={{ tabBarIcon: ({ color }) => <Feather name="home" size={24} color={color} /> }} 
+        component={EmployeesStack} 
+        options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="home" size={24} color={color} /> }} 
       />
       <Tab.Screen 
-        name="V1" 
-        component={Admin2} 
-        options={{ tabBarIcon: ({ color }) => <Feather name="settings" size={24} color={color} /> }} 
+        name="Menu" 
+        component={AddProductScreen} 
+        options={{ tabBarIcon: ({ color }) => <MaterialCommunityIcons name="food" size={24} color={color} /> }} 
       />
       <Tab.Screen 
         name="Salir" 
