@@ -17,7 +17,7 @@ export default function SignStack() {
       <Stack.Screen name="Sign" component={AdminSignScreen} options={{headerShown: false}} />
       <Stack.Screen name="DetallesSign" component={ProductDetailsScreen} options={{headerShown: false}} />
       <Stack.Screen name="AddSign" component={AddSignScreen} options={{headerShown: false}} />
-      <Stack.Screen name="EditarSign" component={EditProductScreen} options={{headerShown: false}} />
+      <Stack.Screen name="EditSign" component={EditProductScreen} options={{headerShown: false}} />
     </Stack.Navigator>
   );
 }

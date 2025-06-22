@@ -2,7 +2,7 @@ import {
     View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Switch, Image,
     KeyboardAvoidingView, Keyboard, Platform, TouchableWithoutFeedback, Alert,
 } from "react-native";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
@@ -15,10 +15,11 @@ import { obtenerTodasLasCondiciones } from "../api/disability";
 const AddWaiterScreen = () => {
     const { logout } = useContext(AuthContext);
     const navigation = useNavigation();
+    const scrollViewRef = useRef(null);
 
     const [nombre, setNombre] = useState("");
-    const [presentacion, setPresentacion] = useState("");
     const [edad, setEdad] = useState("");
+    const [presentacion, setPresentacion] = useState("");
     const [status, setStatus] = useState(true);
     const [foto, setFoto] = useState("");
     const [uploading, setUploading] = useState(false);
@@ -99,6 +100,16 @@ const AddWaiterScreen = () => {
         }
     };
 
+    // Función para manejar el scroll automático cuando se abre el dropdown
+    const handleDropdownOpen = (isOpen) => {
+        if (isOpen && scrollViewRef.current) {
+            // Scroll hacia abajo para mostrar el dropdown completamente
+            setTimeout(() => {
+                scrollViewRef.current.scrollToEnd({ animated: true });
+            }, 100);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -116,7 +127,7 @@ const AddWaiterScreen = () => {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 >
                     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} ref={scrollViewRef}>
                             <View style={{ zIndex: 1000 }}>
                                 <Text style={styles.label}>Nombre</Text>
                                 <TextInput
@@ -161,6 +172,8 @@ const AddWaiterScreen = () => {
                                     textStyle={styles.dropdownText}
                                     listMode="SCROLLVIEW"
                                     modalProps={{ animationType: 'slide' }}
+                                    onOpen={() => handleDropdownOpen(true)}
+                                    onClose={() => handleDropdownOpen(false)}
                                 />
                             </View>
                             <View style={{ zIndex: 500 }}>

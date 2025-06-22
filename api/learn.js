@@ -29,3 +29,9 @@ export const cambiarEstadoJuego = async (id, status) => {
 export const eliminarJuego = async (id) => {
   return await api.delete(`${endpoint}/${id}`);
 };
+export const juegosActivos = async () => {
+  return await api.get(`${endpoint}/activos`);
+};
+export const juegosInactivos = async () => {
+  return await api.get(`${endpoint}/inactivos`);
+};

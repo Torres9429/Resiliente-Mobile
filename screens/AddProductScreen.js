@@ -6,7 +6,7 @@ import {
     TouchableWithoutFeedback,
     Alert,
 } from "react-native";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AuthContext } from "../context/AuthContext";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -20,6 +20,7 @@ const AddProductScreen = () => {
     const { logout } = useContext(AuthContext);
     const route = useRoute();
     const navigation = useNavigation();
+    const scrollViewRef = useRef(null);
 
     const [nombre, setNombre] = useState("");
     const [descripcion, setDescripcion] = useState("");
@@ -118,6 +119,16 @@ const AddProductScreen = () => {
         }
     };
 
+    // Función para manejar el scroll automático cuando se abre el dropdown
+    const handleDropdownOpen = (isOpen) => {
+        if (isOpen && scrollViewRef.current) {
+            // Scroll hacia abajo para mostrar el dropdown completamente
+            setTimeout(() => {
+                scrollViewRef.current.scrollToEnd({ animated: true });
+            }, 100);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -135,7 +146,7 @@ const AddProductScreen = () => {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 >
                     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+                        <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} ref={scrollViewRef} >
                             <Text style={styles.label}>Nombre</Text>
                             <TextInput
                                 style={styles.input}
@@ -178,7 +189,7 @@ const AddProductScreen = () => {
                                 onChangeText={setCodigo}
                             />
 
-                            <View style={styles.switchContainer}>
+                            {/*<View style={styles.switchContainer}>
                                 <Text style={styles.label}>Estado </Text>
                                 <Switch
                                     value={status}
@@ -187,8 +198,41 @@ const AddProductScreen = () => {
                                     thumbColor={status ? "#fff" : "#fff"}
                                 />
                                 <Text style={{ marginLeft: 10 }}>{status ? "Activo" : "Inactivo"}</Text>
-                            </View>
+                            </View>*/}
+                            <Text style={styles.label}>Agregar seña (opcional)</Text>
+                                    <DropDownPicker
+                                        open={open}
+                                        value={value}
+                                        items={items}
+                                        setOpen={(isOpen) => {
+                                            setOpen(isOpen);
+                                            handleDropdownOpen(isOpen);
+                                        }}
+                                        setValue={setValue}
+                                        setItems={setItems}
+                                        placeholder="Selecciona..."
+                                        style={styles.dropdown}
+                                        dropDownContainerStyle={styles.dropdownContainer}
+                                        textStyle={styles.dropdownText}
+                                        listMode="SCROLLVIEW"
+                                        modalProps={{ animationType: 'slide' }}
+                                        ArrowDownIconComponent={styles => (
+                                            <MaterialCommunityIcons name="chevron-down" size={24} color="#BACA16"  {...styles} />
+                                        )}
+                                        ArrowUpIconComponent={styles => (
+                                            <MaterialCommunityIcons name="chevron-up" size={24} color="#BACA16" {...styles} />
+                                        )}
+                                        arrowIconContainerStyle={{ marginRight: 15, height: 40, width: 40}}
+                                        labelStyle={{ color: '#bbb', fontSize: 16 }}
+                                        selectedItemLabelStyle={{ color: '#000', fontSize: 16 }}
+                                        searchable={true}
+                                        searchPlaceholder="Buscar..."
+                                        searchPlaceholderTextColor="#888"
+                                        searchError={() => <Text style={{ color: '#BACA16' }}>No se encontraron resultados</Text>}
+                                        searchStyle={{ color: '#000' }}
+                                        searchTextInputStyle={{ color: '#000' }}
 
+                                    />
                             <Text style={styles.label}>Foto</Text>
                             <TouchableOpacity
                                 style={[styles.input, { justifyContent: 'center', alignItems: 'center' }]}
@@ -199,10 +243,11 @@ const AddProductScreen = () => {
                                 </Text>
                             </TouchableOpacity>
 
+
                             {foto ? (
                                 <Image source={{ uri: foto }} style={styles.imagePreview} />
                             ) : null}
-                            <TouchableOpacity style={[styles.button, { justifyContent: 'center', alignItems: 'center', backgroundColor: "#597cff" }]}
+                            {/*<TouchableOpacity style={[styles.button, { justifyContent: 'center', alignItems: 'center', backgroundColor: "#597cff" }]}
                                 onPress={() => setAddSign(!addSign)}
                             >
                                 <Text style={{ color: '#888', textAlign: 'center', marginTop: 10 }}>
@@ -243,26 +288,29 @@ const AddProductScreen = () => {
 
                                     />
                                 </View>
-                            )}
-
-                        </ScrollView>
-                    </TouchableWithoutFeedback>
-                </KeyboardAvoidingView>
-            </View>
-
-            <TouchableOpacity
+                            )}*/}
+<TouchableOpacity
                 style={[styles.button, uploading && { opacity: 0.7 }]}
                 onPress={handleSave}
                 disabled={uploading}
             >
                 <Text style={styles.buttonText}>{uploading ? "Guardando..." : "Guardar"}</Text>
             </TouchableOpacity>
+                        </ScrollView>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+                
+            </View>
+
+            
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fcfcfc' },
+    container: { flex: 1, backgroundColor: '#fcfcfc', 
+        
+    },
     header: {
         flexDirection: "column",
         alignItems: "center",
@@ -284,6 +332,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         marginTop: -20,
+        paddingBottom: 90,
     },
     title: {
         fontSize: 22,
@@ -358,6 +407,7 @@ const styles = StyleSheet.create({
     dropdownContainer: {
         borderColor: '#ddd',
         backgroundColor: '#f0f0f0',
+        height: 400
     },
     dropdownText: {
         fontSize: 16,

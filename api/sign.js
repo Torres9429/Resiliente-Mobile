@@ -29,3 +29,10 @@ export const cambiarEstadoSena = async (id, sena) => {
 export const eliminarSena = async (id) => {
   return await api.delete(`${endpoint}/${id}`);
 };
+
+export const senasActivas = async () => {
+  return await api.get(`${endpoint}/activas`);
+};
+export const senasInactivas = async () => {
+  return await api.get(`${endpoint}/inactivas`);
+};

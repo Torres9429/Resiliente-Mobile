@@ -8,6 +8,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigation = useNavigation();
   const [error, setError] = useState(null);
@@ -28,7 +29,6 @@ export const AuthProvider = ({ children }) => {
           if (rol === "ADMIN" || rol === "EMPLEADO") {
             setUser(rol);
           } else {
-            // Si el rol no es válido, limpia la sesión
             await logout();
           }
         } catch (e) {
@@ -63,19 +63,13 @@ export const AuthProvider = ({ children }) => {
         }
 
         await saveToken(datos.token);
-        const userData = {
-          userId: datos.userId,
-          email: datos.email,
-          nombre: datos.nombre,
-          apellido: datos.apellido,
-          rol: datos.rol
-        };
-        
-        // Guardar el rol como string JSON
+        // Guardar solo el rol como string
         await AsyncStorage.setItem("rol", JSON.stringify(datos.rol));
-        setUser(datos);
+        setUser(datos.rol);
+        setUserData(datos);
         setError(null);
-        console.log("user auth: ", user);
+        console.log("user auth: ", datos.rol);
+        console.log("user data: ", datos);
       } else {
         setError("Credenciales incorrectas");
       }
@@ -90,12 +84,11 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       setIsLoading(true);
-      // Primero limpiamos el estado
       setUser(null);
+      setUserData(null);
       await removeToken();
       await AsyncStorage.removeItem("rol");
       
-      // Usamos requestAnimationFrame para asegurar que el estado se actualice
       requestAnimationFrame(() => {
         if (navigation) {
           navigation.reset({
@@ -112,7 +105,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, error }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, error, userData }}>
       {children}
     </AuthContext.Provider>
   );

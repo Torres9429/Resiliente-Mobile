@@ -29,3 +29,10 @@ export const cambiarEstadoCondicion = async (id, status) => {
 export const eliminarCondicion = async (id) => {
   return await api.delete(`${endpoint}/${id}`);
 };
+
+export const condicionesActivas = async () => {
+  return await api.get(`${endpoint}/activas`);
+};
+export const condicionesInactivas = async () => {
+  return await api.get(`${endpoint}/inactivas`);
+};

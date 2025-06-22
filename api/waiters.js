@@ -37,3 +37,9 @@ export const cambiarEstadoMesero = async (id, status) => {
 export const eliminarMesero = async (id) => {
   return await api.delete(`${endpoint}/${id}`);
 };
+export const meserosActivos = async () => {
+  return await api.get(`${endpoint}/activos`);
+};
+export const meserosInactivos = async () => {
+  return await api.get(`${endpoint}/inactivos`);
+};

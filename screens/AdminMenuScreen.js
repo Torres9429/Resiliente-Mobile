@@ -21,6 +21,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomModal from '../components/CustomModal';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
 
 
 const AdminMenuScreen = () => {
@@ -32,7 +34,7 @@ const AdminMenuScreen = () => {
     const [videoUri, setVideoUri] = useState(null);
     const [search, setSearch] = useState('');
     const [keyBoardVisible, setKeyBoardVisible] = useState();
-
+    const { theme } = useTheme();
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
             setKeyBoardVisible(true);
@@ -97,16 +99,16 @@ const AdminMenuScreen = () => {
 
 
     const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: theme.cardBackground }]} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
             <Image
                 source={
                     item.foto ? { uri: item.foto } : require('../assets/default-food.png')
                 }
                 style={styles.image}
             />
-            <Text style={styles.name}>{item.nombre}</Text>
-            <Text style={styles.category}>{item.categoria}</Text>
-            <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
+            <Text style={[styles.name, { color: theme.textColor }]}>{item.nombre}</Text>
+            <Text style={[styles.category, { color: theme.textColor }]}>{item.categoria}</Text>
+            <Text style={[styles.price]}>${item.precio.toFixed(2)}</Text>
 
             {expandedIndex === index && (
                 <View style={styles.detailsContainer}>
@@ -141,11 +143,12 @@ const AdminMenuScreen = () => {
     );
 
     return (
-        <View style={styles.container}>
-                    <View style={styles.header}>
+        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+                    <LinearGradient colors={theme.headerGradient} style={styles.header}>
+                        <View style={styles.headerContent}>
                         <Text style={styles.title}>Menú</Text>
                         <View style={styles.btns}>
-                            <View style={styles.searchBarContainer}>
+                            <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
                                 <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
                                 <TextInput
                                     style={styles.searchBar}
@@ -160,12 +163,12 @@ const AdminMenuScreen = () => {
                         <Text style={styles.btnText}>Agregar</Text>
                             </TouchableOpacity>
                         </View>
-                        
-                    </View>
+                        </View>                        
+                    </LinearGradient>
                     
                     {menuItems.length === 0 ? (
                         <>
-                            <View style={styles.bodyContainer}>
+                            <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
                                 <Text style={{ textAlign: 'center', marginTop: 20 }}>
                                 No hay productos disponibles
                                 </Text>
@@ -174,7 +177,7 @@ const AdminMenuScreen = () => {
                         </>
                     ) : (
                         <>
-                        <View style={styles.bodyContainer}>
+                        <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
                             <FlatList
                                 data={productsFiltered}
                                 keyExtractor={(item) => item.id.toString()}
@@ -212,7 +215,7 @@ const styles = StyleSheet.create({
         height: '24%',
         paddingTop: 50,
         paddingHorizontal: 10,
-        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
+        //experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
         //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
     },
     bodyContainer: {
@@ -224,7 +227,8 @@ const styles = StyleSheet.create({
         width: "100%",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        marginTop: -25
+        marginTop: -25,
+        paddingBottom: 100
     },
     list: {
         paddingBottom: 0,

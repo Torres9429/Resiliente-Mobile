@@ -120,7 +120,7 @@ const AdminSignScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
                 <TouchableOpacity
                     style={styles.button2}
-                    onPress={() => navigation.navigate('Editar', { item })}
+                    onPress={() => navigation.navigate('EditSign', { item })}
                 >
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>

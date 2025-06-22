@@ -71,6 +71,7 @@ const EditProductScreen = () => {
             }
 
             const productoDto = {
+                id: item.id,
                 nombre,
                 descripcion,
                 precio: parseFloat(precio),
@@ -121,12 +122,7 @@ const EditProductScreen = () => {
                 >
                     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                         <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Id"
-                                value={id?.toString() || ""}
-                                editable={false}
-                            />
+                            
 
                             <Text style={styles.label}>Nombre</Text>
                             <TextInput

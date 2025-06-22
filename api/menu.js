@@ -29,3 +29,10 @@ export const cambiarEstadoProducto = async (id, status) => {
 export const eliminarProducto = async (id) => {
   return await api.delete(`${endpoint}/${id}`);
 };
+
+export const productosActivos = async () => {
+  return await api.get(`${endpoint}/activos`);
+};
+export const productosInactivos = async () => {
+  return await api.get(`${endpoint}/inactivos`);
+};
