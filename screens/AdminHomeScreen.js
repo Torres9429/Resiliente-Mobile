@@ -123,11 +123,11 @@ const AdminHomeScreen = () => {
         </View>
       </View>
 
-      <View style={styles.footer}>
+      {/*<View style={styles.footer}>
         <TouchableOpacity style={styles.themeButton} onPress={() => toggleTheme()}>
           <MaterialCommunityIcons name="theme-light-dark" size={24} style={{ color: theme.textColor }}/>
         </TouchableOpacity>
-      </View>
+      </View>*/}
     </View>
   );
 };

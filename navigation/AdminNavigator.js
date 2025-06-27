@@ -9,6 +9,7 @@ import MenuStack from "./MenuStack";
 import SignStack from "./SignStack";
 import WaitersStack from "./WaitersStack";
 import { AuthContext } from "../context/AuthContext";
+import AdminLearnScreen from "../screens/AdminLearnScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -109,6 +110,24 @@ const AdminNavigator = () => {
             ]}>
               <MaterialCommunityIcons 
                 name="hand-clap" 
+                size={24} 
+                color={color} 
+              />
+            </View>
+          )
+        }}
+      />
+      <Tab.Screen 
+        name="Lecciones" 
+        component={AdminLearnScreen} 
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <View style={[
+              styles.iconContainer,
+              focused && { backgroundColor: theme.primaryColor + '20' }
+            ]}>
+              <MaterialCommunityIcons 
+                name="book-open-page-variant" 
                 size={24} 
                 color={color} 
               />

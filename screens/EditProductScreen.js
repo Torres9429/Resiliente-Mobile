@@ -190,19 +190,19 @@ const EditProductScreen = () => {
                             {foto ? (
                                 <Image source={{ uri: foto }} style={styles.imagePreview} />
                             ) : null}
-
-                        </ScrollView>
-                    </TouchableWithoutFeedback>
-                </KeyboardAvoidingView>
-            </View>
-
-            <TouchableOpacity
+<TouchableOpacity
                 style={[styles.button, uploading && { opacity: 0.7 }]}
                 onPress={handleActualizar}
                 disabled={uploading}
             >
                 <Text style={styles.buttonText}>{uploading ? "Guardando..." : "Guardar"}</Text>
             </TouchableOpacity>
+                        </ScrollView>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+            </View>
+
+            
         </View>
     );
 };
@@ -229,6 +229,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         marginTop: -20,
+        paddingBottom: 60
     },
     title: {
         fontSize: 22,

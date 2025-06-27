@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Video } from 'expo-video';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { obtenerTodaoLosJuegos } from '../api/learn';
+import { obtenerTodasLosJuegos } from '../api/learn';
 import { useNavigation } from '@react-navigation/native';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
@@ -34,7 +34,7 @@ const LearnScreen = () => {
 
   const fetchGames = async () => {
     try {
-      const response = await obtenerTodaoLosJuegos();
+      const response = await obtenerTodasLosJuegos();
       if (response.data && response.data.datos) {
         setGames(response.data.datos);
       }

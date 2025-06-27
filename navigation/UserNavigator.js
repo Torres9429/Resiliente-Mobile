@@ -18,14 +18,14 @@ const UserNavigator = () => {
       headerShown: false,
       tabBarStyle: {
         position: 'absolute',
-        //bottom: 20,
-        left: 20,
-        right: 20,
-        elevation: 0,
-        backgroundColor: theme.cardBackground,
-        //borderRadius: 15,
-        height: 80,
-        ...styles.shadow
+          //bottom: 20,
+          left: 20,
+          right: 20,
+          elevation: 0,
+          backgroundColor: theme.cardBackground,
+          //borderRadius: 15,
+          height: 80,
+          ...styles.shadow
       },
       tabBarItemStyle: {
         marginTop: 5,

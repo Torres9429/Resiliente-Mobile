@@ -10,7 +10,7 @@ export const obtenerJuegoPorId = async (id) => {
   return await api.get(`${endpoint}/${id}`);
 };
 
-export const obtenerTodaoLosJuegos = async () => {
+export const obtenerTodosLosJuegos = async () => {
   return await api.get(endpoint);
 };
 

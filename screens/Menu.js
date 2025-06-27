@@ -15,6 +15,9 @@ import { CartContext } from '../context/CartContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import CustomModal from '../components/CustomModal';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
+import { globalStyles } from '../styles/globalStyle';
 
 
 const Menu = () => {
@@ -25,9 +28,11 @@ const Menu = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [videoUri, setVideoUri] = useState([null]);
     const [search, setSearch] = useState('');
+    const [filter, setFilter] = useState('todos'); // 'todos', 'activos', 'inactivos'
+    const { theme } = useTheme();
 
-    route = useRoute(); 
-    const {waiter} = route.params || {};
+    route = useRoute();
+    const { waiter } = route.params || {};
     //console.log("Mesero recibido:", waiter);
 
 
@@ -41,21 +46,21 @@ const Menu = () => {
 
     useFocusEffect(
         React.useCallback(() => {
-        const fetchMenu = async () => {
-            try {
-                const response = await obtenerTodosLosProductos();
-                if (response.data.tipo === "SUCCESS") {
-                    setMenuItems(response.data.datos);
-                    console.log("Respuesta completa:", response.data);
-                } else {
-                    console.error("Error en la respuesta:", response.data.mensaje);
+            const fetchMenu = async () => {
+                try {
+                    const response = await obtenerTodosLosProductos();
+                    if (response.data.tipo === "SUCCESS") {
+                        setMenuItems(response.data.datos);
+                        console.log("Respuesta completa:", response.data);
+                    } else {
+                        console.error("Error en la respuesta:", response.data.mensaje);
+                    }
+                } catch (error) {
+                    console.error("Error al obtener los productos:", error);
                 }
-            } catch (error) {
-                console.error("Error al obtener los productos:", error);
-            }
-        };
-        fetchMenu();
-    }, []));
+            };
+            fetchMenu();
+        }, []));
     /*useEffect(() => {
   const interval = setInterval(() => {
     fetchMenu(); // Llama a tu función
@@ -77,7 +82,7 @@ const Menu = () => {
   return () => clearInterval(interval); // Limpia el intervalo al desmontar
 }, []);*/
 
-    
+
 
 
     const handleToggle = (index) => {
@@ -136,41 +141,74 @@ const Menu = () => {
     );
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Menú</Text>
-                <View style={styles.searchBarContainer}>
-                    <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
-                    <TextInput
-                        style={styles.searchBar}
-                        placeholder="Buscar producto..."
-                        placeholderTextColor="#999"
-                        value={search}
-                        onChangeText={setSearch}
-                    />
+        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+            <LinearGradient colors={theme.headerGradient} style={styles.header}>
+                <View style={styles.headerContent}>
+                    <Text style={[styles.title, { color: theme.textColor }]}>Menu</Text>
+
                 </View>
-            </View>
-            
+            </LinearGradient>
+
             {menuItems.length === 0 ? (
                 <>
                     <View style={styles.bodyContainer}>
                         <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                        No hay productos disponibles
+                            No hay productos disponibles
                         </Text>
                     </View>
-                
+
                 </>
             ) : (
                 <>
-                <View style={styles.bodyContainer}>
-                    <FlatList
-                        data={productsFiltered}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={renderItem}
-                        contentContainerStyle={styles.list}
-                        numColumns={2}
-                        showsVerticalScrollIndicator={false}
-                    />
+                    <View style={[styles.sectionContainer, { backgroundColor: theme.backgroundColor }]}>
+                        <View style={styles.btns}>
+                            <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
+                                <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
+                                <TextInput
+                                    style={styles.searchBar}
+                                    placeholder="Buscar producto..."
+                                    placeholderTextColor="#999"
+                                    value={search}
+                                    onChangeText={setSearch}
+                                />
+                            </View>
+
+                        </View>
+                        {/* Filtros */}
+                        <View style={styles.filterContainer}>
+                            <TouchableOpacity
+                                style={[styles.filterButton, filter === 'activos' && styles.filterButtonActive]}
+                                onPress={() => handleFilterChange('activos')}
+                            >
+                                <Text style={styles.filterButtonText}>Activos</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.filterButton, filter === 'inactivos' && styles.filterButtonActive]}
+                                onPress={() => handleFilterChange('inactivos')}
+                            >
+                                <Text style={styles.filterButtonText}>Inactivos</Text>
+                            </TouchableOpacity>
+                            {filter !== 'todos' && (
+                                <TouchableOpacity
+                                    style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
+                                    onPress={() => handleFilterChange('todos')}
+                                >
+                                    <Text style={styles.filterButtonText}>Borrar filtros</Text>
+                                    <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+                    {/* Fin Filtros */}
+                    <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
+                        <FlatList
+                            data={productsFiltered}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={renderItem}
+                            contentContainerStyle={styles.list}
+                            numColumns={2}
+                            showsVerticalScrollIndicator={false}
+                        />
                     </View>
                 </>
             )}
@@ -191,17 +229,35 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         textAlign: 'center',
         color: '#000',
+        height: 30,
     },
     header: {
         flexDirection: "column",
         alignItems: "center",
         width: "100%",
         justifyContent: 'flex-start',
-        height: '24%',
+        height: '20%',
         paddingTop: 50,
         paddingHorizontal: 10,
-        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
+        zIndex: 1,
+        //experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
         //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
+    },
+    headerContent: {
+        width: '100%',
+        //justifyContent: 'space-between',
+        flexDirection: 'column',
+        marginTop: 0,
+        zIndex: 1,
+    },
+    sectionContainer: {
+        width: '100%',
+        zIndex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        paddingBottom: 100,
     },
     bodyContainer: {
         width: '100%',
@@ -209,13 +265,15 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 5,
         backgroundColor: "#fcfcfc",
-        width: "100%",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        marginTop: -25
+        marginTop: -55,
+        paddingBottom: 80,
+        paddingTop: 70,
+        zIndex: 0,
     },
     list: {
-        paddingBottom: 0,
+        paddingBottom: 10,
     },
     card: {
         flex: 1,
@@ -229,7 +287,9 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 3,
         alignContent: 'flex-start',
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
+        maxWidth: '45%',
+
     },
     image: {
         width: '100%',
@@ -303,7 +363,7 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 10,
     },
-    searchBarContainer: {
+    /*searchBarContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'white',
@@ -328,6 +388,80 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: '#333',
+    },*/
+    btns: {
+        height: 40,
+        width: '90%',
+        justifyContent: 'flex-start',
+        flexDirection: 'row',
+        marginTop: 90,
+        position: 'absolute',
+        zIndex: 1,
+        alignSelf: 'center',
+    },
+    btnText: {
+        textAlign: 'center',
+        fontSize: 18,
+        color: '#fff',
+        marginHorizontal: 5
+    },
+    searchBarContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderRadius: 10,
+        paddingHorizontal: 20,
+        paddingVertical: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+        flex: 1,
+        minHeight: 40,
+        maxHeight: 45,
+        marginRight: 10,
+        marginBottom: 35,
+
+    },
+    searchIcon: {
+        marginRight: 10,
+    },
+    searchBar: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+    },
+    // --- Filtros ---
+    filterContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        marginVertical: 10,
+        paddingHorizontal: 5,
+        zIndex: 1,
+        top: 130,
+        left: 10,
+        right: 0,
+    },
+    filterButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        backgroundColor: '#fcedb1', // Color de fondo amarillo claro
+        //backgroundColor: 'rgba(246, 199, 13, 0.2)', //amarillo transparente F6C80D
+        borderColor: 'rgba(187, 202, 22, 0.48)',//'#BACA16' transparente,
+        borderWidth: 1,
+        borderRadius: 20,
+        marginHorizontal: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    filterButtonActive: {
+        backgroundColor: '#BACA16',
+    },
+    filterButtonText: {
+        color: '#333',
+        fontWeight: 'bold',
     },
 
 });

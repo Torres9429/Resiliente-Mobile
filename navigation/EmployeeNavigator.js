@@ -20,27 +20,27 @@ const EmployeeNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
+          position: 'absolute',
           //bottom: 20,
           left: 20,
           right: 20,
           elevation: 0,
           backgroundColor: theme.cardBackground,
-          borderRadius: 15,
+          //borderRadius: 15,
           height: 80,
           ...styles.shadow
         },
         tabBarItemStyle: {
-          marginTop: 10,
-          marginBottom: 0,
+          marginTop: 5,
+          marginBottom: 5,
         },
         tabBarActiveTintColor: theme.primaryColor,
         tabBarInactiveTintColor: theme.textTabBar,
-        tabBarShowLabel: true,
+        tabBarShowLabel: false,
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
-        },
-      
+        }
       }}
     >
       <Tab.Screen 
@@ -116,14 +116,14 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     //padding: 10,
-    paddingVertical: 0,
-    paddingBottom: 15,
+    paddingVertical: 10,
+    //paddingBottom: 15,
     borderRadius: "50%",
-    height: 60,
-    width: 60,
+    height: 50,
+    width: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 15,
     marginBottom: 5,
     marginLeft: 10,
     marginRight: 10,

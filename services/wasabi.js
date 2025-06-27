@@ -1,7 +1,8 @@
 import * as FileSystem from 'expo-file-system';
 import { apiMultipart } from '../api/api';
 
-const endpoint = '/api/upload-to-wasabi';
+const endpoint = '/api/upload';
+const folder = 'productos';
 export const uploadImageToWasabi = async (uri) => {
   try {
     const fileInfo = await FileSystem.getInfoAsync(uri);
@@ -20,6 +21,7 @@ export const uploadImageToWasabi = async (uri) => {
       type,
     });
     formData.append('fileName', fileName); 
+    formData.append('folder', folder);
     const response = await apiMultipart.post(endpoint, formData);
     /* const response = await fetch('http://192.168.0.14:8080/api/upload-to-wasabi', {
       method: 'POST',

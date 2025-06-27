@@ -14,20 +14,21 @@ import {
     TouchableWithoutFeedback,
     Alert,
 } from 'react-native';
-import { eliminarProducto, obtenerTodosLosProductos, productosActivos, productosInactivos } from '../api/menu';
+import {eliminarSena, obtenerTodasLasSenas} from '../api/sign';
+import { obtenerTodosLosJuegos } from '../api/learn';
 import { CartContext } from '../context/CartContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import {  useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomModal from '../components/CustomModal';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { ResizeMode, Video } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 
 
-const AdminMenuScreen = () => {
+const AdminLearnScreen = () => {
     const navigation = useNavigation();
-    const [menuItems, setMenuItems] = useState([]);
+    const [signItems, setSignItems] = useState([]);
     const [expandedIndex, setExpandedIndex] = useState(null);
     const { addToCart } = useContext(CartContext);
     const [modalVisible, setModalVisible] = useState(false);
@@ -35,7 +36,6 @@ const AdminMenuScreen = () => {
     const [search, setSearch] = useState('');
     const [keyBoardVisible, setKeyBoardVisible] = useState();
     const { theme } = useTheme();
-    const [filter, setFilter] = useState('todos'); // 'todos', 'activos', 'inactivos'
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -53,48 +53,29 @@ const AdminMenuScreen = () => {
     }, []);
 
     // filtros de búsqueda
-    const productsFiltered = menuItems.filter(product =>
-        product.nombre.toLowerCase().includes(search.toLowerCase())
-    );
-
-    const handleDelete = async (id) => {
-        try {
-            await eliminarProducto(id);
-            Alert.alert("Éxito", "Producto eliminado correctamente", [
-                { text: "OK" },
-            ]);
-        } catch (error) {
-            console.error("Error al eliminar producto:", error);
-            Alert.alert("Error", "No se pudo eliminar el producto");
-        }
-    }
-
-    const handleFilterChange = async (newFilter) => {
-        setFilter(newFilter);
-        try {
-            let response;
-            if (newFilter === 'activos') {
-                response = await productosActivos();
-            } else if (newFilter === 'inactivos') {
-                response = await productosInactivos();
-            } else {
-                response = await obtenerTodosLosProductos();
+    const signsFiltered = signItems.filter(sign =>
+        sign.nombre.toLowerCase().includes(search.toLowerCase())
+    )
+    
+        const handleDelete = async (id) => {
+            try {
+                await eliminarSena(id);
+                Alert.alert("Éxito", "Seña eliminada correctamente", [
+                    { text: "OK" },
+                ]);
+            } catch (error) {
+                console.error("Error al eliminar seña:", error);
+                Alert.alert("Error", "No se pudo eliminar la seña, por favor intente nuevamente.");
             }
-            if (response.data.tipo === "SUCCESS") {
-                setMenuItems(response.data.datos);
-            }
-        } catch (error) {
-            console.error("Error al filtrar productos:", error);
         }
-    };
 
     useFocusEffect(
         React.useCallback(() => {
-            const fetchMenu = async () => {
+            const fetchSigns = async () => {
                 try {
-                    const response = await obtenerTodosLosProductos();
+                    const response = await obtenerTodosLosJuegos();
                     if (response.data.tipo === "SUCCESS") {
-                        setMenuItems(response.data.datos);
+                        setSignItems(response.data.datos);
                         console.log("Respuesta completa:", response.data);
                     } else {
                         console.error("Error en la respuesta:", response.data.mensaje);
@@ -103,7 +84,7 @@ const AdminMenuScreen = () => {
                     console.error("Error al obtener los productos:", error);
                 }
             };
-            fetchMenu();
+            fetchSigns();
             return () => {
                 // Opcional: limpiar estado 
             };
@@ -120,16 +101,17 @@ const AdminMenuScreen = () => {
 
 
     const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={[styles.card, { backgroundColor: theme.cardBackground }]} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
-            <Image
+        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
+            <Video
                 source={
-                    item.foto ? { uri: item.foto } : require('../assets/default-food.png')
+                    item.video ? { uri: item.video } : require('../assets/default-food.png')
                 }
                 style={styles.image}
+                resizeMode={ResizeMode.COVER}
+                useNativeControls={true}
             />
-            <Text style={[styles.name, { color: theme.textColor }]}>{item.nombre}</Text>
-            <Text style={[styles.category, { color: theme.textColor }]}>{item.categoria}</Text>
-            <Text style={[styles.price]}>${item.precio.toFixed(2)}</Text>
+            <Text style={styles.name}>{item.nombre}</Text>
+            <Text style={styles.category}>{item.categoria}</Text>
 
             {expandedIndex === index && (
                 <View style={styles.detailsContainer}>
@@ -141,7 +123,7 @@ const AdminMenuScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
                 <TouchableOpacity
                     style={styles.button2}
-                    onPress={() => navigation.navigate('Editar', { item })}
+                    onPress={() => navigation.navigate('EditSign', { item })}
                 >
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -164,93 +146,61 @@ const AdminMenuScreen = () => {
     );
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-            <LinearGradient colors={theme.headerGradient} style={styles.header}>
-                <View style={styles.headerContent}>
-                    <Text style={styles.title}>Menú</Text>
-
-                </View>
-            </LinearGradient>
-
-            {menuItems.length === 0 ? (
-                <>
-                    <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
-                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                            No hay productos disponibles
-                        </Text>
-                    </View>
-
-                </>
-            ) : (
-                <>
-                    <View style={styles.sectionContainer}>
+        <View style={styles.container}>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Señas de aprendizaje</Text>
                         <View style={styles.btns}>
-                            <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
+                            <View style={styles.searchBarContainer}>
                                 <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
                                 <TextInput
                                     style={styles.searchBar}
-                                    placeholder="Buscar producto..."
+                                    placeholder="Buscar seña..."
                                     placeholderTextColor="#999"
                                     value={search}
                                     onChangeText={setSearch}
                                 />
                             </View>
-
-                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddProduct')}>
+                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddSign')}>
                                 <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
-                                <Text style={styles.btnText}>Agregar</Text>
+                        <Text style={styles.btnText}>Agregar</Text>
                             </TouchableOpacity>
-
                         </View>
-                        {/* Filtros */}
-                        <View style={styles.filterContainer}>
-                            <TouchableOpacity
-                                style={[styles.filterButton, filter === 'activos' && styles.filterButtonActive]}
-                                onPress={() => handleFilterChange('activos')}
-                            >
-                                <Text style={styles.filterButtonText}>Activos</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.filterButton, filter === 'inactivos' && styles.filterButtonActive]}
-                                onPress={() => handleFilterChange('inactivos')}
-                            >
-                                <Text style={styles.filterButtonText}>Inactivos</Text>
-                            </TouchableOpacity>
-                            {filter !== 'todos' && (
-                                <TouchableOpacity
-                                    style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
-                                    onPress={() => handleFilterChange('todos')}
-                                >
-                                    <Text style={styles.filterButtonText}>Borrar filtros</Text>
-                                    <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
-                                </TouchableOpacity>
-                            )}
-                        </View>
+                        
                     </View>
-                    {/* Fin Filtros */}
-                    <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
-                        <FlatList
-                            data={productsFiltered}
-                            keyExtractor={(item) => item.id.toString()}
-                            renderItem={renderItem}
-                            contentContainerStyle={styles.list}
-                            numColumns={2}
-                            showsVerticalScrollIndicator={false}
-                        />
-                    </View>
-                </>
-            )}
-        </View>
+                    
+                    {signItems.length === 0 ? (
+                        <>
+                            <View style={styles.bodyContainer}>
+                                <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                                No hay productos disponibles
+                                </Text>
+                            </View>
+                        
+                        </>
+                    ) : (
+                        <>
+                        <View style={styles.bodyContainer}>
+                            <FlatList
+                                data={signsFiltered}
+                                keyExtractor={(item) => item.id.toString()}
+                                renderItem={renderItem}
+                                contentContainerStyle={styles.list}
+                                numColumns={2}
+                                showsVerticalScrollIndicator={false}
+                            />
+                            </View>
+                        </>
+                    )}
+                </View>
     );
 };
 
-export default AdminMenuScreen;
+export default AdminLearnScreen;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fcfcfc',
-
     },
     title: {
         fontSize: 24,
@@ -258,33 +208,17 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         textAlign: 'center',
         color: '#000',
-        height: 30,
     },
     header: {
         flexDirection: "column",
         alignItems: "center",
         width: "100%",
         justifyContent: 'flex-start',
-        height: '20%',
+        height: '24%',
         paddingTop: 50,
         paddingHorizontal: 10,
-        //experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
+        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
         //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
-    },
-    headerContent: {
-        width: '100%',
-        //justifyContent: 'space-between',
-        flexDirection: 'column',
-        marginTop: 0,
-    },
-    sectionContainer: {
-        width: '100%',
-        zIndex: 1,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        paddingBottom: 100,
     },
     bodyContainer: {
         width: '100%',
@@ -292,17 +226,15 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 5,
         backgroundColor: "#fcfcfc",
+        width: "100%",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        marginTop: -55,
-        paddingBottom:80,
-        paddingTop: 70,
-        zIndex: 0,
+        marginTop: -25
     },
     list: {
-        paddingBottom: 10,
+        paddingBottom: 0,
     },
-    card: {
+   card: {
         flex: 1,
         backgroundColor: '#fff',
         borderRadius: 12,
@@ -314,16 +246,14 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 3,
         alignContent: 'flex-start',
-        alignItems: 'flex-start',
-        maxWidth: '45%',
-
+        alignItems: 'flex-start'
     },
     image: {
         width: '100%',
-        height: 100,
+        //height: 200,
         borderRadius: 8,
         marginBottom: 8,
-        aspectRatio: 1.5,
+        aspectRatio: 9 / 16,
         alignSelf: 'center',
         //resizeMode: 'center',
     },
@@ -386,7 +316,7 @@ const styles = StyleSheet.create({
     },
     video: {
         width: 150,
-        height: 200,
+        height: 300,
         marginTop: 10,
         borderRadius: 10,
     },
@@ -398,7 +328,7 @@ const styles = StyleSheet.create({
     },
     addButton: {
         flexDirection: 'row',
-        height: 40,
+        height: 50,
         width: '30%',
         backgroundColor: '#BACA16',
         alignItems: 'center',
@@ -407,14 +337,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
     },
     btns: {
-        height: 40,
-        width: '90%',
-        justifyContent: 'flex-start',
+
+        width: '100%',
+        justifyContent: 'space-around',
         flexDirection: 'row',
-        marginTop: 90,
-        position: 'absolute',
-        zIndex: 1,
-        alignSelf: 'center',
     },
     btnText: {
         textAlign: 'center',
@@ -428,18 +354,17 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
         paddingHorizontal: 20,
-        paddingVertical: 5,
+        paddingVertical: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
         flex: 1,
-        minHeight: 40,
-        maxHeight: 45,
-        marginRight: 10,
+        minHeight: 50,
+        maxHeight: 50,
+        marginHorizontal: 10,
         marginBottom: 35,
-
     },
     searchIcon: {
         marginRight: 10,
@@ -449,35 +374,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
-    // --- Filtros ---
-    filterContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        marginVertical: 10,
-        paddingHorizontal: 5,
-        zIndex: 1,
-        top: 130,
-        left: 10,
-        right: 0,
-    },
-    filterButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        backgroundColor: '#fcedb1', // Color de fondo amarillo claro
-        //backgroundColor: 'rgba(246, 199, 13, 0.2)', //amarillo transparente F6C80D
-        borderColor: 'rgba(187, 202, 22, 0.48)',//'#BACA16' transparente,
-        borderWidth: 1,
-        borderRadius: 20,
-        marginHorizontal: 5,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    filterButtonActive: {
-        backgroundColor: '#BACA16',
-    },
-    filterButtonText: {
-        color: '#333',
-        fontWeight: 'bold',
-    },
+
+
 });

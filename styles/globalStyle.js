@@ -170,18 +170,80 @@ export const globalStyles = StyleSheet.create({
   },
 
   // Estilos de contenedores
-  bodyContainer: {
+  btns: {
+    height: 40,
+    width: '90%',
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    marginTop: 90,
+    position: 'absolute',
+    zIndex: 1,
+    alignSelf: 'center',
+},
+btnText: {
+    textAlign: 'center',
+    fontSize: 18,
+    color: '#fff',
+    marginHorizontal: 5
+},
+searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
     flex: 1,
-    paddingVertical: 50,
+    minHeight: 40,
+    maxHeight: 45,
+    marginRight: 10,
+    marginBottom: 35,
+
+},
+searchIcon: {
+    marginRight: 10,
+},
+searchBar: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+},
+// --- Filtros ---
+filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginVertical: 10,
     paddingHorizontal: 5,
-    backgroundColor: "#fcfcfc",
-    width: "100%",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    marginTop: "60%",
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
+    zIndex: 1,
+    top: 130,
+    left: 10,
+    right: 0,
+},
+filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#fcedb1', // Color de fondo amarillo claro
+    //backgroundColor: 'rgba(246, 199, 13, 0.2)', //amarillo transparente F6C80D
+    borderColor: 'rgba(187, 202, 22, 0.48)',//'#BACA16' transparente,
+    borderWidth: 1,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+},
+filterButtonActive: {
+    backgroundColor: '#BACA16',
+},
+filterButtonText: {
+    color: '#333',
+    fontWeight: 'bold',
+},
 
   // Estilos de botones
   button2: {

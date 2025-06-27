@@ -55,26 +55,26 @@ const AddProductScreen = () => {
 
 
     useEffect(() => {
-            const fetchSenas = async () => {
-                try {
-                    const response1 = await obtenerTodasLasSenas();
-                    console.log('aqui si llega')
-                    const response = response1.data.datos;
-                    console.log(response);
-    
-                    const opciones = response.map(sign => ({
-                        label: sign.nombre,
-                        value: sign.id,
-                    }));
-                    console.log(opciones)
-                    setItems(opciones);
-                } catch (error) {
-                    console.error("Error al cargar condiciones", error);
-                }
-            };
-    
-            fetchSenas();
-        }, []);
+        const fetchSenas = async () => {
+            try {
+                const response1 = await obtenerTodasLasSenas();
+                console.log('aqui si llega')
+                const response = response1.data.datos;
+                console.log(response);
+
+                const opciones = response.map(sign => ({
+                    label: sign.nombre,
+                    value: sign.id,
+                }));
+                console.log(opciones)
+                setItems(opciones);
+            } catch (error) {
+                console.error("Error al cargar condiciones", error);
+            }
+        };
+
+        fetchSenas();
+    }, []);
     const handleSave = async () => {
         try {
             let fotoUrl = foto;
@@ -200,39 +200,39 @@ const AddProductScreen = () => {
                                 <Text style={{ marginLeft: 10 }}>{status ? "Activo" : "Inactivo"}</Text>
                             </View>*/}
                             <Text style={styles.label}>Agregar seña (opcional)</Text>
-                                    <DropDownPicker
-                                        open={open}
-                                        value={value}
-                                        items={items}
-                                        setOpen={(isOpen) => {
-                                            setOpen(isOpen);
-                                            handleDropdownOpen(isOpen);
-                                        }}
-                                        setValue={setValue}
-                                        setItems={setItems}
-                                        placeholder="Selecciona..."
-                                        style={styles.dropdown}
-                                        dropDownContainerStyle={styles.dropdownContainer}
-                                        textStyle={styles.dropdownText}
-                                        listMode="SCROLLVIEW"
-                                        modalProps={{ animationType: 'slide' }}
-                                        ArrowDownIconComponent={styles => (
-                                            <MaterialCommunityIcons name="chevron-down" size={24} color="#BACA16"  {...styles} />
-                                        )}
-                                        ArrowUpIconComponent={styles => (
-                                            <MaterialCommunityIcons name="chevron-up" size={24} color="#BACA16" {...styles} />
-                                        )}
-                                        arrowIconContainerStyle={{ marginRight: 15, height: 40, width: 40}}
-                                        labelStyle={{ color: '#bbb', fontSize: 16 }}
-                                        selectedItemLabelStyle={{ color: '#000', fontSize: 16 }}
-                                        searchable={true}
-                                        searchPlaceholder="Buscar..."
-                                        searchPlaceholderTextColor="#888"
-                                        searchError={() => <Text style={{ color: '#BACA16' }}>No se encontraron resultados</Text>}
-                                        searchStyle={{ color: '#000' }}
-                                        searchTextInputStyle={{ color: '#000' }}
+                            <DropDownPicker
+                                open={open}
+                                value={value}
+                                items={items}
+                                setOpen={(isOpen) => {
+                                    setOpen(isOpen);
+                                    handleDropdownOpen(isOpen);
+                                }}
+                                setValue={setValue}
+                                setItems={setItems}
+                                placeholder="Selecciona..."
+                                style={styles.dropdown}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                                textStyle={styles.dropdownText}
+                                listMode="SCROLLVIEW"
+                                modalProps={{ animationType: 'slide' }}
+                                ArrowDownIconComponent={styles => (
+                                    <MaterialCommunityIcons name="chevron-down" size={24} color="#BACA16"  {...styles} />
+                                )}
+                                ArrowUpIconComponent={styles => (
+                                    <MaterialCommunityIcons name="chevron-up" size={24} color="#BACA16" {...styles} />
+                                )}
+                                arrowIconContainerStyle={{ marginRight: 15, height: 40, width: 40 }}
+                                labelStyle={{ color: '#bbb', fontSize: 16 }}
+                                selectedItemLabelStyle={{ color: '#000', fontSize: 16 }}
+                                searchable={true}
+                                searchPlaceholder="Buscar..."
+                                searchPlaceholderTextColor="#888"
+                                searchError={() => <Text style={{ color: '#BACA16' }}>No se encontraron resultados</Text>}
+                                searchStyle={{ color: '#000' }}
+                                searchTextInputStyle={{ color: '#000' }}
 
-                                    />
+                            />
                             <Text style={styles.label}>Foto</Text>
                             <TouchableOpacity
                                 style={[styles.input, { justifyContent: 'center', alignItems: 'center' }]}
@@ -289,27 +289,28 @@ const AddProductScreen = () => {
                                     />
                                 </View>
                             )}*/}
-<TouchableOpacity
-                style={[styles.button, uploading && { opacity: 0.7 }]}
-                onPress={handleSave}
-                disabled={uploading}
-            >
-                <Text style={styles.buttonText}>{uploading ? "Guardando..." : "Guardar"}</Text>
-            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.button, uploading && { opacity: 0.7 }]}
+                                onPress={handleSave}
+                                disabled={uploading}
+                            >
+                                <Text style={styles.buttonText}>{uploading ? "Guardando..." : "Guardar"}</Text>
+                            </TouchableOpacity>
                         </ScrollView>
                     </TouchableWithoutFeedback>
                 </KeyboardAvoidingView>
-                
+
             </View>
 
-            
+
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fcfcfc', 
-        
+    container: {
+        flex: 1, backgroundColor: '#fcfcfc',
+
     },
     header: {
         flexDirection: "column",
