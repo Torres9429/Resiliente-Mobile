@@ -106,7 +106,7 @@ const AdminSignScreen = () => {
                 style={styles.gifStyle}
                 resizeMode="contain"
             />*/}
-             <Image
+             <Video
                 source={
                     item.video ? { uri: item.video } : require('../assets/default-food.png')
                 }
