@@ -56,7 +56,9 @@ export const uploadVideoToWasabi = async (uri) => {
     // Ajustamos el tipo MIME para video, por si acaso el backend necesita algo específico
     const videoTypes = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'mpeg'];
     const ext = match ? match[1].toLowerCase() : '';
-    const type = videoTypes.includes(ext) ? `video/${ext}` : 'video/mp4';
+    //const type = videoTypes.includes(ext) ? `video/${ext}` : 'video/mp4';
+    const type = ext === 'mov' ? 'video/quicktime' : videoTypes.includes(ext) ? `video/${ext}` : 'video/mp4';
+
 
     console.log("Subiendo video a Wasabi:", uri, fileName, type);
     const formData = new FormData();

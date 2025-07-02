@@ -16,9 +16,8 @@ import {
 } from 'react-native';
 import {eliminarSena, obtenerTodasLasSenas} from '../api/sign';
 import { CartContext } from '../context/CartContext';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomModal from '../components/CustomModal';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ResizeMode, Video } from 'expo-av';
@@ -93,20 +92,29 @@ const AdminSignScreen = () => {
     };
     const handleModal = (video) => {
         setModalVisible(true);
+        console.log("video: ", video);
+        
         setVideoUri(video);
     }
 
 
     const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
-            <Video
+        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)} onPress={() => navigation.navigate('DetallesEdit', { item })}*/>
+            
+            {/*<Image
+                source={{ uri: "https://cdn.proyectoresiliente.org/productos/d8f07666-630b-458a-8371-cc56fbd00fa4.gif" }}
+                style={styles.gifStyle}
+                resizeMode="contain"
+            />*/}
+             <Image
                 source={
                     item.video ? { uri: item.video } : require('../assets/default-food.png')
                 }
-                style={styles.image}
-                resizeMode={ResizeMode.COVER}
+                style={styles.gifStyle}
+                resizeMode={ResizeMode.CONTAIN}
+                isLooping={true}
                 useNativeControls={true}
-            />
+            /> 
             <Text style={styles.name}>{item.nombre}</Text>
             <Text style={styles.category}>{item.categoria}</Text>
 
@@ -120,13 +128,13 @@ const AdminSignScreen = () => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
                 <TouchableOpacity
                     style={styles.button2}
-                    onPress={() => navigation.navigate('EditSign', { item })}
+                    onPress={() => navigation.navigate('SignForm', { isEdit: true, signData: item })}
                 >
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handleModal(item.indicaciones?.[0].sena?.video)}
+                    onPress={() => handleModal(item.video)}
                 >
                     <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -134,11 +142,6 @@ const AdminSignScreen = () => {
                     <Ionicons name="trash" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
-            <CustomModal
-                visible={modalVisible}
-                videoUri={videoUri}
-                onClose={() => setModalVisible(false)}
-            />
         </TouchableOpacity>
     );
 
@@ -188,7 +191,12 @@ const AdminSignScreen = () => {
                             </View>
                         </>
                     )}
-                </View>
+                <CustomModal
+                    visible={modalVisible}
+                    videoUri={videoUri}
+                    onClose={() => setModalVisible(false)}
+                />
+        </View>
     );
 };
 
@@ -247,7 +255,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        //height: 200,
+        height: 200,
         borderRadius: 8,
         marginBottom: 8,
         aspectRatio: 9 / 16,
@@ -370,6 +378,13 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: '#333',
+    },
+    gifStyle: {
+        width: '100%',
+        height: 200,
+        borderRadius: 8,
+        marginBottom: 8,
+        alignSelf: 'center',
     },
 
 

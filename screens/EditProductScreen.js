@@ -13,6 +13,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { actualizarProducto } from "../api/menu";
 import { uploadImageToWasabi } from "../services/wasabi";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { obtenerTodasLasSenas } from "../api/sign";
 
 const EditProductScreen = () => {
     const { logout } = useContext(AuthContext);
@@ -30,6 +32,9 @@ const EditProductScreen = () => {
     const [id, setId] = useState(null);
     const [keyBoardVisible, setKeyBoardVisible] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [value, setValue] = useState(null);
+    const [items, setItems] = useState([]);
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -58,7 +63,35 @@ const EditProductScreen = () => {
             setId(item.id || null);
         }
     }, [item]);
+    useEffect(() => {
+        const fetchSenas = async () => {
+            try {
+                const response1 = await obtenerTodasLasSenas();
+                console.log('aqui si llega')
+                const response = response1.data.datos;
+                console.log(response);
 
+                const opciones = response.map(sign => ({
+                    label: sign.nombre,
+                    value: sign.id,
+                }));
+                console.log(opciones)
+                setItems(opciones);
+            } catch (error) {
+                console.error("Error al cargar condiciones", error);
+            }
+        };
+
+        fetchSenas();
+    }, []);
+    const handleDropdownOpen = (isOpen) => {
+        if (isOpen && scrollViewRef.current) {
+            // Scroll hacia abajo para mostrar el dropdown completamente
+            setTimeout(() => {
+                scrollViewRef.current.scrollToEnd({ animated: true });
+            }, 100);
+        }
+    };
     const handleActualizar = async () => {
         try {
             let fotoUrl = foto;
@@ -78,8 +111,11 @@ const EditProductScreen = () => {
                 categoria,
                 codigo,
                 status,
+                idSena:value,
                 foto: fotoUrl,
             };
+            console.log("datos a enviar: ", productoDto);
+            
 
             await actualizarProducto(item.id, productoDto);
             Alert.alert("Éxito", "Producto actualizado correctamente", [
@@ -176,6 +212,40 @@ const EditProductScreen = () => {
                                 />
                                 <Text style={{ marginLeft: 10 }}>{status ? "Activo" : "Inactivo"}</Text>
                             </View>
+                            <Text style={styles.label}>Agregar seña (opcional)</Text>
+                            <DropDownPicker
+                                open={open}
+                                value={value}
+                                items={items}
+                                setOpen={(isOpen) => {
+                                    setOpen(isOpen);
+                                    handleDropdownOpen(isOpen);
+                                }}
+                                setValue={setValue}
+                                setItems={setItems}
+                                placeholder="Selecciona..."
+                                style={styles.dropdown}
+                                dropDownContainerStyle={styles.dropdownContainer}
+                                textStyle={styles.dropdownText}
+                                listMode="SCROLLVIEW"
+                                modalProps={{ animationType: 'slide' }}
+                                ArrowDownIconComponent={styles => (
+                                    <MaterialCommunityIcons name="chevron-down" size={28} color="#BACA16"  {...styles} />
+                                )}
+                                ArrowUpIconComponent={styles => (
+                                    <MaterialCommunityIcons name="chevron-up" size={28} color="#BACA16" {...styles} />
+                                )}
+                                arrowIconContainerStyle={{  height: 40, width: 40, alignSelf: 'center', marginTop: 10 }}
+                                labelStyle={{ color: '#bbb', fontSize: 16 }}
+                                selectedItemLabelStyle={{ color: '#000', fontSize: 16 }}
+                                searchable={true}
+                                searchPlaceholder="Buscar..."
+                                searchPlaceholderTextColor="#888"
+                                searchError={() => <Text style={{ color: '#BACA16' }}>No se encontraron resultados</Text>}
+                                searchStyle={{ color: '#000' }}
+                                searchTextInputStyle={{ color: '#000' }}
+
+                            />
 
                             <Text style={styles.label}>Foto</Text>
                             <TouchableOpacity
@@ -224,12 +294,13 @@ const styles = StyleSheet.create({
     bodyContainer: {
         width: '100%',
         flex: 1,
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingTop:20,
         backgroundColor: "#fff",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         marginTop: -20,
-        paddingBottom: 60
+        //paddingBottom: 60
     },
     title: {
         fontSize: 22,
@@ -292,7 +363,23 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         borderWidth: 1,
         borderColor: '#ccc'
-    }
+    },
+    dropdown: {
+        borderColor: '#ddd',
+        backgroundColor: '#f0f0f0',
+        minHeight: 45,
+        borderRadius: 10,
+        paddingHorizontal: 14,
+    },
+    dropdownContainer: {
+        borderColor: '#ddd',
+        backgroundColor: '#f0f0f0',
+        height: 400
+    },
+    dropdownText: {
+        fontSize: 16,
+        color: '#000',
+    },
 });
 
 export default EditProductScreen;

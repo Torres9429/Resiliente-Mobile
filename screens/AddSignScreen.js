@@ -4,28 +4,28 @@ import {
 } from "react-native";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImageToWasabi, uploadVideoToWasabi } from "../services/wasabi";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {ResizeMode, Video } from 'expo-av';
-import { crearSena } from "../api/sign";
+import { crearSena, actualizarSena } from "../api/sign";
 
-const AddSignScreen = () => {
+const SignFormScreen = () => {
     const { logout } = useContext(AuthContext);
     const navigation = useNavigation();
+    const route = useRoute();
 
-    const [nombre, setNombre] = useState("");
-    const [status, setStatus] = useState(true);
-    const [video, setVideo] = useState("");
+    // Modo edición y datos de la seña (si existen)
+    const isEdit = route?.params?.isEdit || false;
+    const signData = route?.params?.signData || {};
+
+    const [nombre, setNombre] = useState(signData.nombre || "");
+    const [status, setStatus] = useState(signData.status ?? true);
+    const [video, setVideo] = useState(signData.video || "");
     const [uploading, setUploading] = useState(false);
 
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(null);
-    const [items, setItems] = useState([]);
-
-
-    const handleActualizar = async () => {
+    const handleGuardar = async () => {
         if (!nombre || !video) {
             Alert.alert("Campos incompletos", "Por favor, completa todos los campos obligatorios.");
             return;
@@ -39,34 +39,39 @@ const AddSignScreen = () => {
                 videoUrl = await uploadVideoToWasabi(video);
             }
 
-            const nuevaSena = {
+            const senaPayload = {
                 video: videoUrl,
                 nombre,
                 status
             };
 
-            console.log('Datos a enviar:', nuevaSena);
-            await crearSena(nuevaSena);
+            console.log('Datos a enviar:', senaPayload);
+            if (isEdit) {
+                await actualizarSena(signData.id, senaPayload);
+            } else {
+                await crearSena(senaPayload);
+            }
 
             setUploading(false);
-            Alert.alert("Éxito", "Seña guardada correctamente", [
+            Alert.alert("Éxito", isEdit ? "Seña actualizada correctamente" : "Seña guardada correctamente", [
                 { text: "OK", onPress: () => navigation.goBack() },
             ]);
         } catch (error) {
             console.error("Error al guardar seña:", error);
             setUploading(false);
-            Alert.alert("Error", "No se pudo guardar la seña. Por favor, inténtalo de nuevo más tarde.");
+            Alert.alert("Error", isEdit ? "No se pudo actualizar la seña. Por favor, inténtalo de nuevo más tarde." : "No se pudo guardar la seña. Por favor, inténtalo de nuevo más tarde.");
         }
     };
 
     const handleSelectVideo = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['videos'],
+            mediaTypes: ['videos','images','livePhotos'],
             allowsEditing: true,
             aspect: [9, 16],
             quality: 1,
         });
-
+        console.log(result);
+        
         if (!result.canceled) {
             setVideo(result.assets[0].uri);
         }
@@ -79,9 +84,9 @@ const AddSignScreen = () => {
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                     <MaterialCommunityIcons name="chevron-left" size={40} color="#BACA16" />
                 </TouchableOpacity>
-                <Text style={styles.title}>Agregar seña</Text>
+                <Text style={styles.title}>{isEdit ? 'Editar seña' : 'Agregar seña'}</Text>
                 <Text style={styles.subtitle}>
-                    Completa los campos para agregar la seña.
+                    {isEdit ? 'Modifica los campos para actualizar la seña.' : 'Completa los campos para agregar la seña.'}
                 </Text>
             </View>
             <View style={styles.bodyContainer}>
@@ -100,20 +105,22 @@ const AddSignScreen = () => {
                                     onChangeText={setNombre}
                                 />
                             </View>
-                            <View style={{ zIndex: 500 }}>
-                                <View style={styles.switchContainer}>
-                                    <Text style={styles.label}>Estado </Text>
-                                    <Switch
-                                        value={status}
-                                        onValueChange={setStatus}
-                                        trackColor={{ false: "#ccc", true: "#BACA16" }}
-                                        thumbColor="#fff"
-                                    />
-                                    <Text style={{ marginLeft: 10 }}>{status ? "Activo" : "Inactivo"}</Text>
+                            {isEdit && (
+                                <View style={{ zIndex: 500 }}>
+                                    <View style={styles.switchContainer}>
+                                        <Text style={styles.label}>Estado </Text>
+                                        <Switch
+                                            value={status}
+                                            onValueChange={setStatus}
+                                            trackColor={{ false: "#ccc", true: "#BACA16" }}
+                                            thumbColor="#fff"
+                                        />
+                                        <Text style={{ marginLeft: 10 }}>{status ? "Activo" : "Inactivo"}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                            <View style={{ zIndex: 500 }}>
-                                <Text style={styles.label}>video</Text>
+                            )}
+                            <View style={{ zIndex: 1 }}>
+                                <Text style={styles.label}>Video</Text>
                                 <TouchableOpacity
                                     style={[styles.input, { justifyContent: 'center', alignItems: 'center' }]}
                                     onPress={handleSelectVideo}
@@ -128,17 +135,18 @@ const AddSignScreen = () => {
                                     useNativeControls/>
                                 )}
                             </View>
+                            <TouchableOpacity
+                style={[styles.button, uploading && { opacity: 0.7 }]}
+                onPress={handleGuardar}
+                disabled={uploading}
+            >
+                <Text style={styles.buttonText}>{uploading ? (isEdit ? "Actualizando..." : "Guardando...") : (isEdit ? "Actualizar" : "Guardar")}</Text>
+            </TouchableOpacity>
                         </ScrollView>
                     </TouchableWithoutFeedback>
                 </KeyboardAvoidingView>
             </View>
-            <TouchableOpacity
-                style={[styles.button, uploading && { opacity: 0.7 }]}
-                onPress={handleActualizar}
-                disabled={uploading}
-            >
-                <Text style={styles.buttonText}>{uploading ? "Guardando..." : "Guardar"}</Text>
-            </TouchableOpacity>
+            
         </View>
     );
 };
@@ -200,7 +208,8 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 8,
         margin: 20,
-        alignItems: 'center'
+        alignItems: 'center',
+        bottom: 30,
     },
     buttonText: {
         color: "white",
@@ -223,14 +232,15 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
     videoPreview: {
-       width: '50%',              // ocupa todo el ancho disponible
-       maxWidth: 360,
+        width: '50%',              // ocupa todo el ancho disponible
+        maxWidth: 360,
         borderRadius: 10,
         marginTop: 10,
         alignSelf: 'center',
         borderWidth: 1,
         borderColor: '#ccc',
         aspectRatio: 9/16,
+        marginBottom: 30
     },
     dropdown: {
         borderColor: '#ddd',
@@ -246,4 +256,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AddSignScreen;
+export default SignFormScreen;

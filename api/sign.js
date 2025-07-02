@@ -19,7 +19,7 @@ export const obtenerSenasPorEstado = async (status) => {
 };
 
 export const actualizarSena = async (id, sena) => {
-  return await api.put(`${endpoint}/${id}`, SenaDto);
+  return await api.put(`${endpoint}/${id}`, sena);
 };
 
 export const cambiarEstadoSena = async (id, sena) => {

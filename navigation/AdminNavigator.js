@@ -22,10 +22,11 @@ const AdminNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          position: 'absolute',
+          //position: 'absolute',
           //bottom: 20,
           left: 20,
           right: 20,
+          marginTop: 0,
           elevation: 0,
           backgroundColor: theme.cardBackground,
           //borderRadius: 15,

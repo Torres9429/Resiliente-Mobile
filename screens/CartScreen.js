@@ -238,7 +238,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     borderTopWidth: 1,
     borderColor: '#ddd',
-    marginTop: 12,
+    //marginTop: 12,
+    //bottom: 60,
   },
   totalText: {
     fontSize: 18,

@@ -14,6 +14,11 @@ import {
     TouchableWithoutFeedback,
     Alert,
 } from 'react-native';
+import {
+    responsiveWidth as rw,
+    responsiveHeight as rh,
+    responsiveFontSize as rf
+  } from 'react-native-responsive-dimensions';  
 import { eliminarProducto, obtenerTodosLosProductos, productosActivos, productosInactivos } from '../api/menu';
 import { CartContext } from '../context/CartContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -246,7 +251,7 @@ const AdminMenuScreen = () => {
 
 export default AdminMenuScreen;
 
-const styles = StyleSheet.create({
+/* const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fcfcfc',
@@ -284,7 +289,6 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        paddingBottom: 100,
     },
     bodyContainer: {
         width: '100%',
@@ -294,10 +298,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#fcfcfc",
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        marginTop: -55,
-        paddingBottom:80,
-        paddingTop: 70,
-        zIndex: 0,
+        marginTop: -45,
+        paddingTop: 80,
     },
     list: {
         paddingBottom: 10,
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         marginVertical: 10,
         paddingHorizontal: 5,
-        zIndex: 1,
+        //zIndex: 1,
         top: 130,
         left: 10,
         right: 0,
@@ -480,4 +482,222 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: 'bold',
     },
-});
+}); */
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#fcfcfc',
+    },
+    title: {
+      fontSize: rf(3),
+      fontWeight: 'bold',
+      marginBottom: rh(2),
+      textAlign: 'center',
+      color: '#000',
+      height: rh(4),
+    },
+    header: {
+      flexDirection: "column",
+      alignItems: "center",
+      width: "100%",
+      justifyContent: 'flex-start',
+      height: rh(20),
+      paddingTop: rh(6),
+      paddingHorizontal: rw(3),
+    },
+    headerContent: {
+      width: '100%',
+      flexDirection: 'column',
+      marginTop: 0,
+    },
+    sectionContainer: {
+      width: '100%',
+      zIndex: 1,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+    },
+    bodyContainer: {
+      width: '100%',
+      flex: 1,
+      paddingHorizontal: rw(2),
+      backgroundColor: "#fcfcfc",
+      borderTopLeftRadius: rw(6),
+      borderTopRightRadius: rw(6),
+      marginTop: -rh(6),
+      paddingTop: rh(8),
+    },
+    list: {
+      paddingBottom: rh(1),
+    },
+    card: {
+      flex: 1,
+      backgroundColor: '#fff',
+      borderRadius: rw(3),
+      padding: rw(2),
+      margin: rw(2),
+      alignItems: 'flex-start',
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 5,
+      elevation: 3,
+      maxWidth: rw(45),
+    },
+    image: {
+      width: rw(40),
+      height: rh(14),
+      borderRadius: rw(2),
+      marginBottom: rh(1),
+      //aspectRatio: 1.5,
+      alignSelf: 'center',
+    },
+    name: {
+      fontSize: rf(2),
+      fontWeight: 'bold',
+      color: '#333',
+      textAlign: 'left',
+    },
+    category: {
+      fontSize: rf(1.5),
+      color: '#777',
+      marginBottom: rh(0.5),
+    },
+    price: {
+      fontSize: rf(1.8),
+      fontWeight: 'bold',
+      color: '#BACA16',
+      marginBottom: rh(1),
+    },
+    description: {
+      fontSize: rf(1.5),
+      color: '#555',
+      marginTop: rh(1),
+      textAlign: 'center',
+    },
+    button: {
+      backgroundColor: '#BACA16',
+      paddingVertical: rh(0.8),
+      paddingHorizontal: rw(2),
+      borderRadius: rw(5),
+      marginTop: rh(1),
+      width: rw(10),
+    },
+    button2: {
+      backgroundColor: '#f6c80d',
+      paddingVertical: rh(0.8),
+      paddingHorizontal: rw(2),
+      borderRadius: rw(5),
+      marginTop: rh(1),
+      width: rw(10),
+    },
+    button3: {
+      backgroundColor: '#597cff',
+      paddingVertical: rh(0.8),
+      paddingHorizontal: rw(2),
+      borderRadius: rw(5),
+      marginTop: rh(1),
+      width: rw(10),
+    },
+    detailsContainer: {
+      alignItems: 'center',
+    },
+    gif: {
+      width: rw(20),
+      height: rh(10),
+      marginTop: rh(1),
+    },
+    video: {
+      width: rw(40),
+      height: rh(25),
+      marginTop: rh(1),
+      borderRadius: rw(2),
+    },
+    buttons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '100%',
+      marginTop: rh(1),
+    },
+    addButton: {
+      flexDirection: 'row',
+      height: rh(5),
+      width: rw(30),
+      backgroundColor: '#BACA16',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: rw(3),
+      paddingHorizontal: rw(3),
+    },
+    btns: {
+      height: rh(5),
+      width: '90%',
+      justifyContent: 'flex-start',
+      flexDirection: 'row',
+      marginTop: rh(11),
+      position: 'absolute',
+      zIndex: 1,
+      alignSelf: 'center',
+    },
+    btnText: {
+      textAlign: 'center',
+      fontSize: rf(2),
+      color: '#fff',
+      marginHorizontal: rw(1),
+    },
+    searchBarContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'white',
+      borderRadius: rw(3),
+      paddingHorizontal: rw(4),
+      paddingVertical: rh(0.6),
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 3,
+      flex: 1,
+      minHeight: rh(5),
+      maxHeight: rh(6),
+      marginRight: rw(3),
+      marginBottom: rh(4),
+    },
+    searchIcon: {
+      marginRight: rw(2),
+    },
+    searchBar: {
+      flex: 1,
+      fontSize: rf(2),
+      color: '#333',
+    },
+    filterContainer: {
+      flexDirection: 'row',
+      justifyContent: 'flex-start',
+      marginVertical: rh(1),
+      paddingHorizontal: rw(2),
+      top: rh(16),
+      left: rw(2),
+      right: 0,
+    },
+    filterButton: {
+      paddingVertical: rh(1.2),
+      paddingHorizontal: rw(4),
+      backgroundColor: '#fcedb1',
+      borderColor: 'rgba(187, 202, 22, 0.48)',
+      borderWidth: 1,
+      borderRadius: rw(10),
+      marginHorizontal: rw(1.5),
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    filterButtonActive: {
+      backgroundColor: '#BACA16',
+    },
+    filterButtonText: {
+      color: '#333',
+      fontWeight: 'bold',
+      fontSize: rf(1.8),
+    },
+  }); 

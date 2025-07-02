@@ -217,12 +217,12 @@ const AddProductScreen = () => {
                                 listMode="SCROLLVIEW"
                                 modalProps={{ animationType: 'slide' }}
                                 ArrowDownIconComponent={styles => (
-                                    <MaterialCommunityIcons name="chevron-down" size={24} color="#BACA16"  {...styles} />
+                                    <MaterialCommunityIcons name="chevron-down" size={28} color="#BACA16"  {...styles} />
                                 )}
                                 ArrowUpIconComponent={styles => (
-                                    <MaterialCommunityIcons name="chevron-up" size={24} color="#BACA16" {...styles} />
+                                    <MaterialCommunityIcons name="chevron-up" size={28} color="#BACA16" {...styles} />
                                 )}
-                                arrowIconContainerStyle={{ marginRight: 15, height: 40, width: 40 }}
+                                arrowIconContainerStyle={{ height: 40, width: 40, alignSelf: 'center', marginTop: 10}}
                                 labelStyle={{ color: '#bbb', fontSize: 16 }}
                                 selectedItemLabelStyle={{ color: '#000', fontSize: 16 }}
                                 searchable={true}
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         marginTop: -20,
-        paddingBottom: 90,
+        //paddingBottom: 90,
     },
     title: {
         fontSize: 22,

@@ -41,9 +41,9 @@ const UserHomeScreen = () => {
 
           }}
           autoPlay={true}
-          autoPlayInterval={3000}
+          autoPlayInterval={4000}
           data={carouselData}
-          scrollAnimationDuration={5000}
+          scrollAnimationDuration={6000}
           renderItem={({ item }) => (
             <Image source={item.image} style={styles.carouselImage} />
           )}

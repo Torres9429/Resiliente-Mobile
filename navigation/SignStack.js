@@ -6,8 +6,9 @@ import ProductDetailsScreen from '../screens/ProductDetailsScreen';
 import AdminMenuScreen from '../screens/AdminMenuScreen';
 import EditProductScreen from '../screens/EditProductScreen';
 import AddProductScreen from '../screens/AddProductScreen';
-import AddSignScreen from '../screens/AddSignScreen';
+
 import AdminSignScreen from '../screens/AdminSignsScreen';
+import SignFormScreen from '../screens/AddSignScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,8 +17,8 @@ export default function SignStack() {
     <Stack.Navigator initialRouteName='Sign'>
       <Stack.Screen name="Sign" component={AdminSignScreen} options={{headerShown: false}} />
       <Stack.Screen name="DetallesSign" component={ProductDetailsScreen} options={{headerShown: false}} />
-      <Stack.Screen name="AddSign" component={AddSignScreen} options={{headerShown: false}} />
-      <Stack.Screen name="EditSign" component={EditProductScreen} options={{headerShown: false}} />
+      <Stack.Screen name="AddSign" component={SignFormScreen} options={{headerShown: false}} />
+      <Stack.Screen name="SignForm" component={SignFormScreen} options={{headerShown: false}} />
     </Stack.Navigator>
   );
 }

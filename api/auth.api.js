@@ -11,6 +11,7 @@ export const login = async (credentials) => {
     //console.log("response authApi: ", response.data.datos);
     return response;
   } catch (error) {
+    // Re-lanzar el error para que el AuthContext lo maneje
     throw error;
   }
 };

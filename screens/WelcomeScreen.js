@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import {
     View,
@@ -11,73 +12,77 @@ import {
 
 const WelcomeScreen = ({ navigation }) => {
     const [selectedButton, setSelectedButton] = useState('UserHome');
-
     const handlePress = (button) => {
         setSelectedButton(button);
         navigation.navigate(button);
     };
 
     return (
-            <ImageBackground
-                source={require('../assets/Rectangle 9.png')}
-                style={{ flex: 1, justifyContent: 'center', alignItems: 'center', }}>
-                <View style={styles.container}>
-                    <Text style={styles.title}>
-                        Bienvenido a <Text style={styles.titleHighlight}>Resiliente</Text>
-                    </Text>
+            
+            <View style={styles.header}>
+                <LinearGradient colors={['#51BBF5', '#559BFA', 'rgb(22, 36, 87)']} locations={[0.0, 0.44, 1.0]} style={styles.header}>
+                    <View style={styles.container}>
+                        <Text style={styles.title}>
+                            Bienvenido a <Text style={styles.titleHighlight}>Resiliente</Text>
+                        </Text>
 
-                    <Image
-                        source={require('../assets/logo.png')}
-                        style={styles.image}
-                        resizeMode="contain"
-                    />
+                        <Image
+                            source={require('../assets/logo.png')}
+                            style={styles.image}
+                            resizeMode="contain"
+                        />
 
-                    <View style={styles.buttonsSection}>
-                        <TouchableOpacity
-                            style={[
-                                styles.button,
-                                selectedButton === 'UserHome' && styles.buttonSelected,
-                            ]}
-                            onPress={() => handlePress('UserHome')}
-                        >
-                            <Text
+                        <View style={styles.buttonsSection}>
+                            <TouchableOpacity
                                 style={[
-                                    styles.buttonText,
-                                    selectedButton === 'UserHome' && styles.buttonTextSelected,
+                                    styles.button,
+                                    selectedButton === 'UserHome' && styles.buttonSelected,
                                 ]}
+                                onPress={() => handlePress('UserHome')}
                             >
-                                ¡Ordena ya!
-                            </Text>
-                        </TouchableOpacity>
+                                <Text
+                                    style={[
+                                        styles.buttonText,
+                                        selectedButton === 'UserHome' && styles.buttonTextSelected,
+                                    ]}
+                                >
+                                    ¡Ordena ya!
+                                </Text>
+                            </TouchableOpacity>
 
-                        <Text style={styles.orText}>o</Text>
+                            <Text style={styles.orText}>o</Text>
 
-                        <TouchableOpacity
-                            style={[
-                                styles.button,
-                                selectedButton === 'Login' && styles.buttonSelected,
-                            ]}
-                            onPress={() => handlePress('Login')}
-                        >
-                            <Text
+                            <TouchableOpacity
                                 style={[
-                                    styles.buttonText,
-                                    selectedButton === 'Login' && styles.buttonTextSelected,
+                                    styles.button,
+                                    selectedButton === 'Login' && styles.buttonSelected,
                                 ]}
+                                onPress={() => handlePress('Login')}
                             >
-                                Inicia sesión
-                            </Text>
-                        </TouchableOpacity>
+                                <Text
+                                    style={[
+                                        styles.buttonText,
+                                        selectedButton === 'Login' && styles.buttonTextSelected,
+                                    ]}
+                                >
+                                    Inicia sesión
+                                </Text>
+                            </TouchableOpacity>
 
-                        <Text style={styles.note}>Solo para personal</Text>
+                            <Text style={styles.note}>Solo para personal</Text>
+                        </View>
                     </View>
-                </View>
-            </ImageBackground>
+                </LinearGradient>
+            </View>
 
     );
 };
 
 const styles = StyleSheet.create({
+    header: {
+        flex: 1,
+        //backgroundColor: '#f3f3f3',
+    },
     safeArea: {
         flex: 1,
         backgroundColor: '#f3f3f3',

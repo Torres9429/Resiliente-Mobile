@@ -5,12 +5,23 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 const LoginScreen = () => {
-  const { login, error: authError, isLoading } = useContext(AuthContext);
+  const { login, isLoading } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
   const [errorMessage, setErrorMessage] = useState(null);
+
+  // Limpiar errores cuando el usuario empiece a escribir
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    setErrorMessage(null);
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setErrorMessage(null);
+  };
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -23,8 +34,25 @@ const LoginScreen = () => {
       console.log("password: ", password);
       await login(email, password);
     } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      setErrorMessage(error.message);
+      console.error("Error al iniciar sesión (login):", error);
+      
+      // Manejar diferentes tipos de errores
+      if (error.response?.status === 401) {
+        const errorMessage = error.response?.data?.mensaje || '';
+        if (errorMessage.includes('Credenciales inválidas')) {
+          setErrorMessage("Correo o contraseña incorrectos");
+        } else {
+          setErrorMessage("Error de autenticación. Por favor, inicie sesión nuevamente.");
+        }
+      } else if (error.response?.status === 500) {
+        setErrorMessage("Error del servidor. Intente más tarde.");
+      } else if (error.code === 'NETWORK_ERROR') {
+        setErrorMessage("Error de conexión. Verifique su internet.");
+      } else if (error.message) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("Error inesperado. Intente nuevamente.");
+      }
     }
   };
 
@@ -45,7 +73,7 @@ const LoginScreen = () => {
           placeholder="Correo electrónico"
           autoCapitalize="none"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={handleEmailChange}
           keyboardType="email-address"
         />
       </View>
@@ -57,16 +85,14 @@ const LoginScreen = () => {
           placeholder="Contraseña"
           secureTextEntry={!showPassword}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
           <Ionicons name={showPassword ? "eye" : "eye-off"} size={24} color="#aaa" style={styles.icon} />
         </TouchableOpacity>
       </View>
 
-      {(errorMessage || authError) && (
-        <Text style={styles.errorText}>{errorMessage || authError}</Text>
-      )}
+      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
       <TouchableOpacity 
         style={[styles.button, isLoading && styles.buttonDisabled]} 
         onPress={handleSubmit}
