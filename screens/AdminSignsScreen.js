@@ -101,20 +101,13 @@ const AdminSignScreen = () => {
     const renderItem = ({ item, index }) => (
         <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)} onPress={() => navigation.navigate('DetallesEdit', { item })}*/>
             
-            {/*<Image
-                source={{ uri: "https://cdn.proyectoresiliente.org/productos/d8f07666-630b-458a-8371-cc56fbd00fa4.gif" }}
-                style={styles.gifStyle}
-                resizeMode="contain"
-            />*/}
-             <Video
+            <Image
                 source={
                     item.video ? { uri: item.video } : require('../assets/default-food.png')
                 }
                 style={styles.gifStyle}
-                resizeMode={ResizeMode.CONTAIN}
-                isLooping={true}
-                useNativeControls={true}
-            /> 
+                
+            />
             <Text style={styles.name}>{item.nombre}</Text>
             <Text style={styles.category}>{item.categoria}</Text>
 
@@ -380,11 +373,13 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     gifStyle: {
-        width: '100%',
+        //width: '100%',
         height: 200,
         borderRadius: 8,
         marginBottom: 8,
         alignSelf: 'center',
+        aspectRatio: 9/16,
+        resizeMode: 'cover'
     },
 
 

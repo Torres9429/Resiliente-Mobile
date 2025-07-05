@@ -121,6 +121,8 @@ const AdminMenuScreen = () => {
     const handleModal = (video) => {
         setModalVisible(true);
         setVideoUri(video);
+        console.log(video);
+        
     }
 
 
@@ -152,7 +154,7 @@ const AdminMenuScreen = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handleModal(item.indicaciones?.[0].sena?.video)}
+                    onPress={() => handleModal(item?.sena?.video)}
                 >
                     <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
                 </TouchableOpacity>
