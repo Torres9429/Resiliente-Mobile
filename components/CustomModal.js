@@ -36,7 +36,7 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
         if (videoUri) {
             fetch(videoUri)
                 .then(response => {
-                    console.log('Fetch response status:', response.status);
+                    console.log('Fetch response status modal:', response.status);
                     console.log('Fetch response headers:', response.headers);
                 })
                 .catch(error => {
@@ -94,9 +94,20 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.modalText}>¡Sigue las señas para pedir tu orden!</Text><ScrollView>
-                    <Text style={{color: 'red', marginBottom: 10}}>Debug: {videoUri}</Text>
+                    {/* <Text style={{color: 'red', marginBottom: 10}}>Debug: {videoUri}</Text> */}
+                    <Video
+                        ref={video}
+                        style={styles.video}
+                        source={{
+                            uri: videoUri,
+                        }}
+                        useNativeControls
+                        resizeMode={ResizeMode.CONTAIN}
+                        isLooping
+                        onPlaybackStatusUpdate={status => setStatus(() => status)}
+                    />
                     
-                    <View style={styles.gifStyle}>
+                    {/*<View style={styles.gifStyle}>
                         <Text style={{color: 'blue'}}>Área del GIF</Text>
                         <Image
                             source={require('../assets/default-food.png')}
@@ -125,17 +136,15 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                                 <Text style={{color: 'blue', textAlign: 'center'}}>Cargando GIF...</Text>
                             </View>
                         ) : (
-                            <Image
+                            <Video
                                 source={{ uri: videoUri }}
                                 style={{width: '100%', height: '100%'}}
                                 resizeMode="contain"
-                                onLoad={handleImageLoad}
-                                onError={handleImageError}
                             />
                         )}
                     </View>
                     
-                    <View style={[styles.gifStyle, {marginTop: 10}]}>
+                     <View style={[styles.gifStyle, {marginTop: 10}]}>
                         <Text style={{color: 'purple'}}>GIF de ejemplo (funciona)</Text>
                         <Image
                             source={{ uri: 'https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif' }}
@@ -144,8 +153,24 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                             onLoad={() => console.log('GIF de ejemplo cargado exitosamente')}
                             onError={(error) => console.log('Error cargando GIF de ejemplo:', error.nativeEvent)}
                         />
+                    </View> */}
+                    <View style={styles.buttons}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                if (status.isPlaying) {
+                                    video.current.pauseAsync();
+                                } else {
+                                    video.current.playAsync();
+                                }
+                            }}
+                        >
+                            <MaterialCommunityIcons
+                                name={status.isPlaying ? 'pause' : 'play'}
+                                size={36}
+                                color="#BACA16"
+                            />
+                        </TouchableOpacity>
                     </View>
-                    
                     </ScrollView>
                 </View>
 

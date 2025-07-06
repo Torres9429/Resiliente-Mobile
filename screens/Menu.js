@@ -23,26 +23,29 @@ import {
     responsiveHeight as rh,
     responsiveFontSize as rf
   } from 'react-native-responsive-dimensions';  
+import InstructionsModal from '../components/InstructionsModal';
 
 
 const Menu = () => {
-    const navigation = useNavigation();
-    const [menuItems, setMenuItems] = useState([]);
-    const [expandedIndex, setExpandedIndex] = useState(null);
-    const { addToCart } = useContext(CartContext);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [videoUri, setVideoUri] = useState([null]);
-    const [search, setSearch] = useState('');
-    const [filter, setFilter] = useState('todos'); // 'todos', 'activos', 'inactivos'
-    const { theme } = useTheme();
+    const navigation = useNavigation()
+    const [menuItems, setMenuItems] = useState([])
+    const [expandedIndex, setExpandedIndex] = useState(null)
+    const { addToCart } = useContext(CartContext)
+    const [modalVisible, setModalVisible] = useState(false)
+    const [instructionsModalVisible, setInstructionsModalVisible] = useState(false)
+    const [videoUri, setVideoUri] = useState([null])
+    const [selectedProduct, setSelectedProduct] = useState(null)
+    const [search, setSearch] = useState("")
+    const [filter, setFilter] = useState("todos")
+    const { theme } = useTheme()
 
-    const route = useRoute();
-    const { waiter } = route.params || {};
-    //console.log("Mesero recibido:", waiter);
+    const route = useRoute()
+    const { waiter } = route.params || {}
+    console.log("Mesero recibido:", waiter)
+    console.log("Condición del mesero:", waiter?.condicion?.id)
 
-
-    const video = useRef(null);
-    const [status, setStatus] = useState({});
+    const video = useRef(null)
+    const [status, setStatus] = useState({})
 
     // filtros de búsqueda
     const productsFiltered = menuItems.filter(product =>
@@ -102,6 +105,35 @@ const Menu = () => {
         addToCart(item);
         alert('Producto agregado al carrito');
     };
+    const handleInstructionsModal = (product) => {
+        setSelectedProduct(product)
+        setInstructionsModalVisible(true)
+      }
+
+    const renderActionButton = (item) => {
+        // Si la condición del mesero es 1, mostrar botón de señas
+        if (waiter?.condicion?.id === 1) {
+          return (
+            <TouchableOpacity style={styles.button} onPress={() => handleModal(item.sena?.video)}>
+              <MaterialCommunityIcons name="hand-clap" size={rw(6)} color="#fff" />
+            </TouchableOpacity>
+          )
+        }
+        // Si la condición del mesero es 2, mostrar botón de instrucciones
+        else if (waiter?.condicion?.id === 2) {
+          return (
+            <TouchableOpacity style={styles.button2} onPress={() => handleInstructionsModal(item)}>
+              <MaterialCommunityIcons name="format-list-bulleted" size={rw(6)} color="#fff" />
+            </TouchableOpacity>
+          )
+        }
+        // Por defecto, mostrar botón de señas
+        return (
+          <TouchableOpacity style={styles.button} onPress={() => handleModal(item.sena?.video)}>
+            <MaterialCommunityIcons name="hand-clap" size={rw(6)} color="#fff" />
+          </TouchableOpacity>
+        )
+      }
 
     const renderItem = ({ item, index }) => (
         <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('Detalles', { item })}>
@@ -123,25 +155,22 @@ const Menu = () => {
             )}
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%', alignItems: 'center', }}>
-                <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
-                <TouchableOpacity
-                    style={styles.button2}
-                    onPress={() => handleAddToCart(item)}
-                >
-                    <MaterialCommunityIcons name="cart-plus" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => handleModal(item.sena?.video)}
-                >
-                    <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
-                </TouchableOpacity>
+            <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
+        <TouchableOpacity style={styles.button3} onPress={() => handleAddToCart(item)}>
+          <MaterialCommunityIcons name="cart-plus" size={rw(6)} color="#fff" />
+        </TouchableOpacity>
+        {renderActionButton(item)}
             </View>
             <CustomModal
                 visible={modalVisible}
                 videoUri={videoUri}
                 onClose={() => setModalVisible(false)}
             />
+            <InstructionsModal
+            visible={instructionsModalVisible}
+            product={selectedProduct}
+            onClose={() => setInstructionsModalVisible(false)}
+        />
         </TouchableOpacity>
     );
 

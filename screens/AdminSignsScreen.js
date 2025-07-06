@@ -81,10 +81,22 @@ const AdminSignScreen = () => {
                 }
             };
             fetchSigns();
+            // Probar si la URL es accesible
+        if (videoUri) {
+            fetch(videoUri)
+                .then(response => {
+                    console.log('Fetch response status admin:', response.status, ' uri: ', videoUri);
+                    console.log('Fetch response headers:', response.headers);
+                })
+                .catch(error => {
+                    console.log('Fetch error:', error);
+                });
+        }
             return () => {
                 // Opcional: limpiar estado 
             };
         }, [])
+        
     );
 
     const handleToggle = (index) => {
@@ -101,11 +113,16 @@ const AdminSignScreen = () => {
     const renderItem = ({ item, index }) => (
         <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)} onPress={() => navigation.navigate('DetallesEdit', { item })}*/>
             
-            <Image
+            <Video
                 source={
                     item.video ? { uri: item.video } : require('../assets/default-food.png')
                 }
                 style={styles.gifStyle}
+                resizeMode={ResizeMode.CONTAIN}
+                isLooping={true}
+                useNativeControls={true}
+                onLoad={() => console.log('Imagen local cargada exitosamente')}
+                            onError={(error) => console.log('Error cargando imagen local:', error.nativeEvent)}
                 
             />
             <Text style={styles.name}>{item.nombre}</Text>

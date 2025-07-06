@@ -1,257 +1,222 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from "react"
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert } from "react-native"
 import {
-    View,
-    Text,
-    FlatList,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    SafeAreaView,
-    TextInput,
-    KeyboardAvoidingView,
-    Keyboard,
-    Platform,
-    TouchableWithoutFeedback,
-    Alert,
-} from 'react-native';
-import {
-    responsiveWidth as rw,
-    responsiveHeight as rh,
-    responsiveFontSize as rf
-  } from 'react-native-responsive-dimensions';  
-import { eliminarProducto, obtenerTodosLosProductos, productosActivos, productosInactivos } from '../api/menu';
-import { CartContext } from '../context/CartContext';
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import CustomModal from '../components/CustomModal';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../context/ThemeContext';
-
+  responsiveWidth as rw,
+  responsiveHeight as rh,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions"
+import { eliminarProducto, obtenerTodosLosProductos, productosActivos, productosInactivos } from "../api/menu"
+import { CartContext } from "../context/CartContext"
+import { Ionicons } from "@expo/vector-icons"
+import { useFocusEffect } from "@react-navigation/native"
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import CustomModal from "../components/CustomModal"
+import { useNavigation } from "@react-navigation/native"
+import { LinearGradient } from "expo-linear-gradient"
+import { useTheme } from "../context/ThemeContext"
 
 const AdminMenuScreen = () => {
-    const navigation = useNavigation();
-    const [menuItems, setMenuItems] = useState([]);
-    const [expandedIndex, setExpandedIndex] = useState(null);
-    const { addToCart } = useContext(CartContext);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [videoUri, setVideoUri] = useState(null);
-    const [search, setSearch] = useState('');
-    const [keyBoardVisible, setKeyBoardVisible] = useState();
-    const { theme } = useTheme();
-    const [filter, setFilter] = useState('todos'); // 'todos', 'activos', 'inactivos'
+  const navigation = useNavigation()
+  const [menuItems, setMenuItems] = useState([])
+  const [expandedIndex, setExpandedIndex] = useState(null)
+  const { addToCart } = useContext(CartContext)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [videoUri, setVideoUri] = useState(null)
+  const [search, setSearch] = useState("")
+  const [keyBoardVisible, setKeyBoardVisible] = useState()
+  const { theme } = useTheme()
+  const [filter, setFilter] = useState("todos")
 
-    useEffect(() => {
-        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-            setKeyBoardVisible(true);
-        });
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyBoardVisible(true)
+    })
 
-        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyBoardVisible(false);
-        });
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyBoardVisible(false)
+    })
 
-        return () => {
-            keyboardDidShowListener.remove();
-            keyboardDidHideListener.remove();
-        };
-    }, []);
-
-    // filtros de búsqueda
-    const productsFiltered = menuItems.filter(product =>
-        product.nombre.toLowerCase().includes(search.toLowerCase())
-    );
-
-    const handleDelete = async (id) => {
-        try {
-            await eliminarProducto(id);
-            Alert.alert("Éxito", "Producto eliminado correctamente", [
-                { text: "OK" },
-            ]);
-        } catch (error) {
-            console.error("Error al eliminar producto:", error);
-            Alert.alert("Error", "No se pudo eliminar el producto");
-        }
+    return () => {
+      keyboardDidShowListener.remove()
+      keyboardDidHideListener.remove()
     }
+  }, [])
 
-    const handleFilterChange = async (newFilter) => {
-        setFilter(newFilter);
-        try {
-            let response;
-            if (newFilter === 'activos') {
-                response = await productosActivos();
-            } else if (newFilter === 'inactivos') {
-                response = await productosInactivos();
-            } else {
-                response = await obtenerTodosLosProductos();
-            }
-            if (response.data.tipo === "SUCCESS") {
-                setMenuItems(response.data.datos);
-            }
-        } catch (error) {
-            console.error("Error al filtrar productos:", error);
-        }
-    };
+  // filtros de búsqueda
+  const productsFiltered = menuItems.filter((product) => product.nombre.toLowerCase().includes(search.toLowerCase()))
 
-    useFocusEffect(
-        React.useCallback(() => {
-            const fetchMenu = async () => {
-                try {
-                    const response = await obtenerTodosLosProductos();
-                    if (response.data.tipo === "SUCCESS") {
-                        setMenuItems(response.data.datos);
-                        console.log("Respuesta completa:", response.data);
-                    } else {
-                        console.error("Error en la respuesta:", response.data.mensaje);
-                    }
-                } catch (error) {
-                    console.error("Error al obtener los productos:", error);
-                }
-            };
-            fetchMenu();
-            return () => {
-                // Opcional: limpiar estado 
-            };
-        }, [])
-    );
-
-    const handleToggle = (index) => {
-        setExpandedIndex(index === expandedIndex ? null : index);
-    };
-    const handleModal = (video) => {
-        setModalVisible(true);
-        setVideoUri(video);
-        console.log(video);
-        
+  const handleDelete = async (id) => {
+    try {
+      await eliminarProducto(id)
+      Alert.alert("Éxito", "Producto eliminado correctamente", [{ text: "OK" }])
+    } catch (error) {
+      console.error("Error al eliminar producto:", error)
+      Alert.alert("Error", "No se pudo eliminar el producto")
     }
+  }
 
+  const handleFilterChange = async (newFilter) => {
+    setFilter(newFilter)
+    try {
+      let response
+      if (newFilter === "activos") {
+        response = await productosActivos()
+      } else if (newFilter === "inactivos") {
+        response = await productosInactivos()
+      } else {
+        response = await obtenerTodosLosProductos()
+      }
+      if (response.data.tipo === "SUCCESS") {
+        setMenuItems(response.data.datos)
+      }
+    } catch (error) {
+      console.error("Error al filtrar productos:", error)
+    }
+  }
 
-    const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={[styles.card, { backgroundColor: theme.cardBackground }]} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
-            <Image
-                source={
-                    item.foto ? { uri: item.foto } : require('../assets/default-food.png')
-                }
-                style={styles.image}
-            />
-            <Text style={[styles.name, { color: theme.textColor }]}>{item.nombre}</Text>
-            <Text style={[styles.category, { color: theme.textColor }]}>{item.categoria}</Text>
-            <Text style={[styles.price]}>${item.precio.toFixed(2)}</Text>
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchMenu = async () => {
+        try {
+          const response = await obtenerTodosLosProductos()
+          if (response.data.tipo === "SUCCESS") {
+            setMenuItems(response.data.datos)
+            console.log("Respuesta completa:", response.data)
+          } else {
+            console.error("Error en la respuesta:", response.data.mensaje)
+          }
+        } catch (error) {
+          console.error("Error al obtener los productos:", error)
+        }
+      }
+      fetchMenu()
+      return () => {
+        // Opcional: limpiar estado
+      }
+    }, []),
+  )
 
-            {expandedIndex === index && (
-                <View style={styles.detailsContainer}>
-                    <Text style={styles.description}>{item.descripcion}</Text>
+  const handleToggle = (index) => {
+    setExpandedIndex(index === expandedIndex ? null : index)
+  }
+  const handleModal = (video) => {
+    setModalVisible(true)
+    setVideoUri(video)
+    console.log(video)
+  }
 
-                </View>
-            )}
+  const renderItem = ({ item, index }) => (
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: theme.cardBackground }]}
+      onPress={() => navigation.navigate("DetallesEdit", { item })}
+    >
+      <Image source={item.foto ? { uri: item.foto } : require("../assets/default-food.png")} style={styles.image} />
+      <Text style={[styles.name, { color: theme.textColor }]}>{item.nombre}</Text>
+      <Text style={[styles.category, { color: theme.textColor }]}>{item.categoria}</Text>
+      <Text style={[styles.price]}>${item.precio.toFixed(2)}</Text>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
-                <TouchableOpacity
-                    style={styles.button2}
-                    onPress={() => navigation.navigate('Editar', { item })}
-                >
-                    <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => handleModal(item?.sena?.video)}
-                >
-                    <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button3} onPress={() => handleDelete(item.id)}>
-                    <Ionicons name="trash" size={24} color="#fff" />
-                </TouchableOpacity>
-            </View>
-            <CustomModal
-                visible={modalVisible}
-                videoUri={videoUri}
-                onClose={() => setModalVisible(false)}
-            />
-        </TouchableOpacity>
-    );
-
-    return (
-        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-            <LinearGradient colors={theme.headerGradient} style={styles.header}>
-                <View style={styles.headerContent}>
-                    <Text style={styles.title}>Menú</Text>
-
-                </View>
-            </LinearGradient>
-
-            {menuItems.length === 0 ? (
-                <>
-                    <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
-                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                            No hay productos disponibles
-                        </Text>
-                    </View>
-
-                </>
-            ) : (
-                <>
-                    <View style={styles.sectionContainer}>
-                        <View style={styles.btns}>
-                            <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
-                                <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
-                                <TextInput
-                                    style={styles.searchBar}
-                                    placeholder="Buscar producto..."
-                                    placeholderTextColor="#999"
-                                    value={search}
-                                    onChangeText={setSearch}
-                                />
-                            </View>
-
-                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddProduct')}>
-                                <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
-                                <Text style={styles.btnText}>Agregar</Text>
-                            </TouchableOpacity>
-
-                        </View>
-                        {/* Filtros */}
-                        <View style={styles.filterContainer}>
-                            <TouchableOpacity
-                                style={[styles.filterButton, filter === 'activos' && styles.filterButtonActive]}
-                                onPress={() => handleFilterChange('activos')}
-                            >
-                                <Text style={styles.filterButtonText}>Activos</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.filterButton, filter === 'inactivos' && styles.filterButtonActive]}
-                                onPress={() => handleFilterChange('inactivos')}
-                            >
-                                <Text style={styles.filterButtonText}>Inactivos</Text>
-                            </TouchableOpacity>
-                            {filter !== 'todos' && (
-                                <TouchableOpacity
-                                    style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
-                                    onPress={() => handleFilterChange('todos')}
-                                >
-                                    <Text style={styles.filterButtonText}>Borrar filtros</Text>
-                                    <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </View>
-                    {/* Fin Filtros */}
-                    <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
-                        <FlatList
-                            data={productsFiltered}
-                            keyExtractor={(item) => item.id.toString()}
-                            renderItem={renderItem}
-                            contentContainerStyle={styles.list}
-                            numColumns={2}
-                            showsVerticalScrollIndicator={false}
-                        />
-                    </View>
-                </>
-            )}
+      {expandedIndex === index && (
+        <View style={styles.detailsContainer}>
+          <Text style={styles.description}>{item.descripcion}</Text>
         </View>
-    );
-};
+      )}
 
-export default AdminMenuScreen;
+      <View style={{ flexDirection: "row", justifyContent: "space-around", width: "100%" }}>
+        <TouchableOpacity style={styles.button2} onPress={() => navigation.navigate("Editar", { item })}>
+          <MaterialCommunityIcons name="pencil" size={rw(6)} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => handleModal(item?.sena?.video)}>
+          <MaterialCommunityIcons name="hand-clap" size={rw(6)} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button3} onPress={() => handleDelete(item.id)}>
+          <Ionicons name="trash" size={rw(6)} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      <CustomModal visible={modalVisible} videoUri={videoUri} onClose={() => setModalVisible(false)} />
+    </TouchableOpacity>
+  )
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+      <LinearGradient colors={theme.headerGradient} style={styles.header}>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>Menú</Text>
+        </View>
+      </LinearGradient>
+
+      {menuItems.length === 0 ? (
+        <>
+          <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
+            <Text style={{ textAlign: "center", marginTop: rh(3), color: theme.textColor }}>
+              No hay productos disponibles
+            </Text>
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.sectionContainer}>
+            <View style={styles.btns}>
+              <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
+                <Ionicons name="search" size={rw(5)} color="#416FDF" style={styles.searchIcon} />
+                <TextInput
+                  style={[styles.searchBar, { color: theme.textColor }]}
+                  placeholder="Buscar producto..."
+                  placeholderTextColor="#999"
+                  value={search}
+                  onChangeText={setSearch}
+                />
+              </View>
+
+              <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("AddProduct")}>
+                <MaterialCommunityIcons name="plus" size={rw(6)} color="#fff" style={{ marginLeft: 0 }} />
+                <Text style={styles.btnText}>Agregar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Filtros */}
+            <View style={styles.filterContainer}>
+              <TouchableOpacity
+                style={[styles.filterButton, filter === "activos" && styles.filterButtonActive]}
+                onPress={() => handleFilterChange("activos")}
+              >
+                <Text style={styles.filterButtonText}>Activos</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterButton, filter === "inactivos" && styles.filterButtonActive]}
+                onPress={() => handleFilterChange("inactivos")}
+              >
+                <Text style={styles.filterButtonText}>Inactivos</Text>
+              </TouchableOpacity>
+              {filter !== "todos" && (
+                <TouchableOpacity
+                  style={[styles.filterButton, filter === "todos" && styles.filterButtonActive]}
+                  onPress={() => handleFilterChange("todos")}
+                >
+                  <Text style={styles.filterButtonText}>Borrar filtros</Text>
+                  <MaterialCommunityIcons name="close" size={rw(4.5)} color="#333" style={{ marginLeft: rw(1) }} />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+          {/* Fin Filtros */}
+          <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
+            <FlatList
+              data={productsFiltered}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={styles.list}
+              numColumns={2}
+              showsVerticalScrollIndicator={false}
+              key={`${rw(100)}-${rh(100)}`} // Force re-render on orientation change
+            />
+          </View>
+        </>
+      )}
+    </View>
+  )
+}
+
+export default AdminMenuScreen
 
 /* const styles = StyleSheet.create({
     container: {
