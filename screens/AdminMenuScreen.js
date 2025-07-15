@@ -108,7 +108,6 @@ const AdminMenuScreen = () => {
   const renderItem = ({ item, index }) => (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: theme.cardBackground }]}
-      onPress={() => navigation.navigate("DetallesEdit", { item })}
     >
       <Image source={item.foto ? { uri: item.foto } : require("../assets/default-food.png")} style={styles.image} />
       <Text style={[styles.name, { color: theme.textColor }]}>{item.nombre}</Text>
@@ -122,7 +121,7 @@ const AdminMenuScreen = () => {
       )}
 
       <View style={{ flexDirection: "row", justifyContent: "space-around", width: "100%" }}>
-        <TouchableOpacity style={styles.button2} onPress={() => navigation.navigate("Editar", { item })}>
+        <TouchableOpacity style={styles.button2} onPress={() => navigation.navigate("EditProduct", { item })}>
           <MaterialCommunityIcons name="pencil" size={rw(6)} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => handleModal(item?.sena?.video)}>
@@ -460,7 +459,7 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: rh(2),
       textAlign: 'center',
-      color: '#000',
+      color: '#fff',
       height: rh(4),
     },
     header: {
@@ -513,7 +512,7 @@ const styles = StyleSheet.create({
     },
     image: {
       width: rw(40),
-      height: rh(14),
+      height: rh(18),
       borderRadius: rw(2),
       marginBottom: rh(1),
       //aspectRatio: 1.5,
@@ -595,6 +594,13 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       borderRadius: rw(3),
       paddingHorizontal: rw(3),
+      // Sombra para Android
+        elevation: 4,
+        // Sombra para iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
     },
     btns: {
       height: rh(5),

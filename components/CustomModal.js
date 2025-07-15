@@ -102,58 +102,10 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                             uri: videoUri,
                         }}
                         useNativeControls
-                        resizeMode={ResizeMode.CONTAIN}
+                        resizeMode={ResizeMode.COVER}
                         isLooping
                         onPlaybackStatusUpdate={status => setStatus(() => status)}
                     />
-                    
-                    {/*<View style={styles.gifStyle}>
-                        <Text style={{color: 'blue'}}>Área del GIF</Text>
-                        <Image
-                            source={require('../assets/default-food.png')}
-                            style={{width: '100%', height: '100%'}}
-                            resizeMode="contain"
-                            onLoad={() => console.log('Imagen local cargada exitosamente')}
-                            onError={(error) => console.log('Error cargando imagen local:', error.nativeEvent)}
-                        />
-                    </View>
-                    
-                    <View style={[styles.gifStyle, {marginTop: 10}]}>
-                        <Text style={{color: 'green'}}>Tu GIF: {videoUri}</Text>
-                        
-                        {hasError ? (
-                            <View style={{width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0'}}>
-                                <Text style={{color: 'red', textAlign: 'center', padding: 20}}>
-                                    Error al cargar el GIF{'\n'}
-                                    El archivo es muy grande (51MB){'\n\n'}
-                                    Recomendación:{'\n'}
-                                    Optimiza el GIF a menos de 5MB{'\n'}
-                                    o convierte a MP4
-                                </Text>
-                            </View>
-                        ) : isLoading ? (
-                            <View style={{width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0'}}>
-                                <Text style={{color: 'blue', textAlign: 'center'}}>Cargando GIF...</Text>
-                            </View>
-                        ) : (
-                            <Video
-                                source={{ uri: videoUri }}
-                                style={{width: '100%', height: '100%'}}
-                                resizeMode="contain"
-                            />
-                        )}
-                    </View>
-                    
-                     <View style={[styles.gifStyle, {marginTop: 10}]}>
-                        <Text style={{color: 'purple'}}>GIF de ejemplo (funciona)</Text>
-                        <Image
-                            source={{ uri: 'https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif' }}
-                            style={{width: '100%', height: '100%'}}
-                            resizeMode="contain"
-                            onLoad={() => console.log('GIF de ejemplo cargado exitosamente')}
-                            onError={(error) => console.log('Error cargando GIF de ejemplo:', error.nativeEvent)}
-                        />
-                    </View> */}
                     <View style={styles.buttons}>
                         <TouchableOpacity
                             onPress={() => {
@@ -191,7 +143,8 @@ const styles = StyleSheet.create({
         minHeight: '50%',
         bottom: 0,
         position: "absolute",
-        padding: 30,
+        paddingVertical: 30,
+        paddingHorizontal: 0,
         backgroundColor: "white",
         borderRadius: 50,
         alignItems: "center",
@@ -202,10 +155,11 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     video: {
-        width: '80%',
         height: 450,
         marginTop: 10,
         borderRadius: 10,
+        aspectRatio: 9/16,
+        alignSelf: 'center',
     },
     buttons: {
         flexDirection: "row",

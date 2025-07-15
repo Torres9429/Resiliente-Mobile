@@ -8,6 +8,7 @@ import { obtenerTodosLosProductos } from '../api/menu';
 import { obtenerTodosLosMeseros } from '../api/waiters';
 import { obtenerTodasLasSenas } from '../api/sign';
 import { LinearGradient } from 'expo-linear-gradient';
+import { obtenerTodosLosJuegos } from '../api/learn';
 
 const AdminHomeScreen = () => {
   const navigation = useNavigation();
@@ -16,27 +17,34 @@ const AdminHomeScreen = () => {
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalWaiters: 0,
-    totalSigns: 0
+    totalSigns: 0, 
+    totalGames: 0
   });
 
   const menuItems = [
     {
       title: 'Menú',
       icon: 'food',
-      screen: 'MenuStack',
+      screen: 'Menu', // Cambiado a Menu.js
       color: theme.secondaryColor
     },
     {
       title: 'Empleados',
       icon: 'account-group',
-      screen: 'AdminEmployees',
+      screen: 'Employees', 
       color: theme.primaryColor
     },
     {
       title: 'Señas',
       icon: 'hand-clap',
-      screen: 'AdminSigns',
+      screen: 'Signs',
       color: theme.tertiaryColor
+    },
+    {
+      title: 'Juegos',
+      icon: 'game-controller',
+      screen: 'Games', 
+      color: theme.accentColor
     }
   ];
 
@@ -46,16 +54,18 @@ const AdminHomeScreen = () => {
 
   const fetchStats = async () => {
     try {
-      const [productsRes, waitersRes, signsRes] = await Promise.all([
+      const [productsRes, waitersRes, signsRes, gamesRes] = await Promise.all([
         obtenerTodosLosProductos(),
         obtenerTodosLosMeseros(),
-        obtenerTodasLasSenas()
+        obtenerTodasLasSenas(),
+        obtenerTodosLosJuegos()
       ]);
 
       setStats({
         totalProducts: productsRes.data.datos?.length || 0,
         totalWaiters: waitersRes.data.datos?.length || 0,
-        totalSigns: signsRes.data.datos?.length || 0
+        totalSigns: signsRes.data.datos?.length || 0,
+        totalGames: gamesRes.data.datos?.length || 0
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -97,15 +107,20 @@ const AdminHomeScreen = () => {
             <Text style={styles.statNumber}>{stats.totalProducts}</Text>
             <Text style={styles.statLabel}>Productos</Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: theme.accentColor }]}>
+          <View style={[styles.statCard, { backgroundColor: theme.tertiaryColor }]}>
             <MaterialCommunityIcons name="account-group" size={24} color="#fff" />
             <Text style={styles.statNumber}>{stats.totalWaiters}</Text>
             <Text style={styles.statLabel}>Meseros</Text>
           </View>
-          <View style={[styles.statCard, { backgroundColor: theme.primaryColor }]}>
+          <View style={[styles.statCard, { backgroundColor: theme.accentColor }]}>
             <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
             <Text style={styles.statNumber}>{stats.totalSigns}</Text>
             <Text style={styles.statLabel}>Señas</Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: theme.primaryColor }]}>
+            <Ionicons name="game-controller" size={24} color="#fff" />
+            <Text style={styles.statNumber}>{stats.totalGames}</Text>
+            <Text style={styles.statLabel}>Señas de Aprendizaje</Text>
           </View>
         </ScrollView>
 
@@ -115,10 +130,15 @@ const AdminHomeScreen = () => {
               key={index}
               style={[styles.menuItem, { backgroundColor: item.color }]}
               onPress={() => navigation.navigate(item.screen)}
-            >
+            >{
+              item.title === "Juegos" ? (
+              <Ionicons name={item.icon} size={32} color="#fff" />
+            ) : (
               <MaterialCommunityIcons name={item.icon} size={32} color="#fff" />
+            )}
               <Text style={styles.menuItemText}>{item.title}</Text>
             </TouchableOpacity>
+            
           ))}
         </View>
       </View>

@@ -1,379 +1,456 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import {
-    View,
-    Text,
-    FlatList,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    SafeAreaView,
-    TextInput,
-    KeyboardAvoidingView,
-    Keyboard,
-    Platform,
-    TouchableWithoutFeedback,
-    Alert,
-} from 'react-native';
-import {eliminarSena, obtenerTodasLasSenas} from '../api/sign';
-import { obtenerTodosLosJuegos } from '../api/learn';
-import { CartContext } from '../context/CartContext';
-import { Ionicons } from '@expo/vector-icons';
-import {  useFocusEffect } from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import CustomModal from '../components/CustomModal';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { ResizeMode, Video } from 'expo-av';
-import { useTheme } from '../context/ThemeContext';
+"use client"
 
+import React, { useState, useEffect, useContext } from "react"
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert } from "react-native"
+import { eliminarJuego, obtenerTodosLosJuegos } from "../api/learn"
+import { CartContext } from "../context/CartContext"
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import { useFocusEffect } from "@react-navigation/native"
+import CustomModal from "../components/CustomModal"
+import { useNavigation } from "@react-navigation/native"
+import { ResizeMode, Video } from "expo-av"
+import { useTheme } from "../context/ThemeContext"
+import { LinearGradient } from "expo-linear-gradient"
+import {
+  responsiveWidth as rw,
+  responsiveHeight as rh,
+  responsiveFontSize as rf,
+} from "react-native-responsive-dimensions"
 
 const AdminLearnScreen = () => {
-    const navigation = useNavigation();
-    const [signItems, setSignItems] = useState([]);
-    const [expandedIndex, setExpandedIndex] = useState(null);
-    const { addToCart } = useContext(CartContext);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [videoUri, setVideoUri] = useState(null);
-    const [search, setSearch] = useState('');
-    const [keyBoardVisible, setKeyBoardVisible] = useState();
-    const { theme } = useTheme();
+  const navigation = useNavigation()
+  const [gameItems, setGameItems] = useState([])
+  const [expandedIndex, setExpandedIndex] = useState(null)
+  const { addToCart } = useContext(CartContext)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [videoUri, setVideoUri] = useState(null)
+  const [search, setSearch] = useState("")
+  const [keyBoardVisible, setKeyBoardVisible] = useState()
+  const { theme } = useTheme()
 
-    useEffect(() => {
-        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-            setKeyBoardVisible(true);
-        });
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyBoardVisible(true)
+    })
 
-        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyBoardVisible(false);
-        });
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyBoardVisible(false)
+    })
 
-        return () => {
-            keyboardDidShowListener.remove();
-            keyboardDidHideListener.remove();
-        };
-    }, []);
-
-    // filtros de búsqueda
-    const signsFiltered = signItems.filter(sign =>
-        sign.nombre.toLowerCase().includes(search.toLowerCase())
-    )
-    
-        const handleDelete = async (id) => {
-            try {
-                await eliminarSena(id);
-                Alert.alert("Éxito", "Seña eliminada correctamente", [
-                    { text: "OK" },
-                ]);
-            } catch (error) {
-                console.error("Error al eliminar seña:", error);
-                Alert.alert("Error", "No se pudo eliminar la seña, por favor intente nuevamente.");
-            }
-        }
-
-    useFocusEffect(
-        React.useCallback(() => {
-            const fetchSigns = async () => {
-                try {
-                    const response = await obtenerTodosLosJuegos();
-                    if (response.data.tipo === "SUCCESS") {
-                        setSignItems(response.data.datos);
-                        console.log("Respuesta completa:", response.data);
-                    } else {
-                        console.error("Error en la respuesta:", response.data.mensaje);
-                    }
-                } catch (error) {
-                    console.error("Error al obtener los productos:", error);
-                }
-            };
-            fetchSigns();
-            return () => {
-                // Opcional: limpiar estado 
-            };
-        }, [])
-    );
-
-    const handleToggle = (index) => {
-        setExpandedIndex(index === expandedIndex ? null : index);
-    };
-    const handleModal = (video) => {
-        setModalVisible(true);
-        setVideoUri(video);
+    return () => {
+      keyboardDidShowListener.remove()
+      keyboardDidHideListener.remove()
     }
+  }, [])
 
+  // filtros de búsqueda
+  const gamesFiltered = gameItems.filter((game) => game.nombre.toLowerCase().includes(search.toLowerCase()))
 
-    const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('DetallesEdit', { item })}>
-            <Video
-                source={
-                    item.video ? { uri: item.video } : require('../assets/default-food.png')
-                }
-                style={styles.image}
-                resizeMode={ResizeMode.COVER}
-                useNativeControls={true}
-            />
-            <Text style={styles.name}>{item.nombre}</Text>
-            <Text style={styles.category}>{item.categoria}</Text>
+  const handleDelete = async (id) => {
+    try {
+      await eliminarJuego(id)
+      Alert.alert("Éxito", "Juego eliminado correctamente", [{ text: "OK" }])
+      // Recargar la lista
+      fetchGames()
+    } catch (error) {
+      console.error("Error al eliminar juego:", error)
+      Alert.alert("Error", "No se pudo eliminar el juego, por favor intente nuevamente.")
+    }
+  }
 
-            {expandedIndex === index && (
-                <View style={styles.detailsContainer}>
-                    <Text style={styles.description}>{item.descripcion}</Text>
+  const fetchGames = async () => {
+    try {
+      const response = await obtenerTodosLosJuegos()
+      if (response.data.tipo === "SUCCESS") {
+        setGameItems(response.data.datos)
+        console.log("Respuesta completa juegos:", response.data)
+      } else {
+        console.error("Error en la respuesta:", response.data.mensaje)
+      }
+    } catch (error) {
+      console.error("Error al obtener los juegos:", error)
+    }
+  }
 
-                </View>
-            )}
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchGames()
+      return () => {
+        // Opcional: limpiar estado
+      }
+    }, []),
+  )
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
-                <TouchableOpacity
-                    style={styles.button2}
-                    onPress={() => navigation.navigate('EditSign', { item })}
-                >
-                    <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => handleModal(item.indicaciones?.[0].sena?.video)}
-                >
-                    <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.button3} onPress={() => handleDelete(item.id)}>
-                    <Ionicons name="trash" size={24} color="#fff" />
-                </TouchableOpacity>
-            </View>
-            <CustomModal
-                visible={modalVisible}
-                videoUri={videoUri}
-                onClose={() => setModalVisible(false)}
-            />
+  const handleToggle = (index) => {
+    setExpandedIndex(index === expandedIndex ? null : index)
+  }
+
+  const handleModal = (video) => {
+    setModalVisible(true)
+    setVideoUri(video)
+  }
+
+  const renderItem = ({ item, index }) => (
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: theme.cardBackground }]}
+      onPress={() => navigation.navigate("DetallesEdit", { item })}
+    >
+      {item.foto ? (
+        <Video
+          source={{ uri: item.foto }}
+          style={styles.image}
+          resizeMode={ResizeMode.COVER}
+          useNativeControls={false}
+          shouldPlay={false}
+        />
+      ) : (
+        <Image source={require("../assets/default-food.png")} style={styles.image} />
+      )}
+      <Text style={[styles.name, { color: theme.textColor }]}>{item.nombre}</Text>
+      <Text style={[styles.category, { color: theme.textColor }]}>{item.categoria || "Juego educativo"}</Text>
+
+      {expandedIndex === index && (
+        <View style={styles.detailsContainer}>
+          <Text style={[styles.description, { color: theme.textColor }]}>{item.descripcion}</Text>
+        </View>
+      )}
+
+      <View style={{ flexDirection: "row", justifyContent: "space-around", width: "100%" }}>
+        <TouchableOpacity
+          style={styles.button2}
+          onPress={() => navigation.navigate("EditGame", { formType: "game", isEdit: true, item })}
+        >
+          <MaterialCommunityIcons name="pencil" size={rw(6)} color="#fff" />
         </TouchableOpacity>
-    );
+        <TouchableOpacity style={styles.button} onPress={() => handleModal(item.foto)}>
+          <MaterialCommunityIcons name="play" size={rw(6)} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button3} onPress={() => handleDelete(item.idJuego || item.id)}>
+          <Ionicons name="trash" size={rw(6)} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      <CustomModal visible={modalVisible} videoUri={videoUri} onClose={() => setModalVisible(false)} />
+    </TouchableOpacity>
+  )
 
-    return (
-        <View style={styles.container}>
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Señas de aprendizaje</Text>
-                        <View style={styles.btns}>
-                            <View style={styles.searchBarContainer}>
-                                <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
-                                <TextInput
-                                    style={styles.searchBar}
-                                    placeholder="Buscar seña..."
-                                    placeholderTextColor="#999"
-                                    value={search}
-                                    onChangeText={setSearch}
-                                />
-                            </View>
-                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddSign')}>
-                                <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
-                        <Text style={styles.btnText}>Agregar</Text>
-                            </TouchableOpacity>
-                        </View>
-                        
-                    </View>
-                    
-                    {signItems.length === 0 ? (
-                        <>
-                            <View style={styles.bodyContainer}>
-                                <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                                No hay productos disponibles
-                                </Text>
-                            </View>
-                        
-                        </>
-                    ) : (
-                        <>
-                        <View style={styles.bodyContainer}>
-                            <FlatList
-                                data={signsFiltered}
-                                keyExtractor={(item) => item.id.toString()}
-                                renderItem={renderItem}
-                                contentContainerStyle={styles.list}
-                                numColumns={2}
-                                showsVerticalScrollIndicator={false}
-                            />
-                            </View>
-                        </>
-                    )}
-                </View>
-    );
-};
+  return (
+    <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+      <LinearGradient colors={theme.headerGradient} style={styles.header}>
+        <View style={styles.headerContent}>
+          <Text style={styles.title}>Juegos de Aprendizaje</Text>
+        </View>
+      </LinearGradient>
+      <View style={styles.sectionContainer}>
+            <View style={styles.btns}>
+              <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
+                <Ionicons name="search" size={rw(5)} color="#416FDF" style={styles.searchIcon} />
+                <TextInput
+                  style={[styles.searchBar, { color: theme.textColor }]}
+                  placeholder="Buscar juego..."
+                  placeholderTextColor="#999"
+                  value={search}
+                  onChangeText={setSearch}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => navigation.navigate("AddGame", { formType: "game", isEdit: false })}
+              >
+                <MaterialCommunityIcons name="plus" size={rw(6)} color="#fff" style={{ marginLeft: 0 }} />
+                <Text style={styles.btnText}>Agregar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-export default AdminLearnScreen;
+      {gameItems.length === 0 ? (
+        <>
+          <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons name="gamepad-variant" size={rw(20)} color="#BACA16" />
+              <Text style={[styles.emptyText, { color: theme.textColor }]}>No hay juegos disponibles</Text>
+              <Text style={[styles.emptySubtext, { color: theme.textColor }]}>
+                Agrega juegos educativos para que los usuarios puedan aprender
+              </Text>
+            </View>
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.sectionContainer}>
+            <View style={styles.btns}>
+              <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
+                <Ionicons name="search" size={rw(5)} color="#416FDF" style={styles.searchIcon} />
+                <TextInput
+                  style={[styles.searchBar, { color: theme.textColor }]}
+                  placeholder="Buscar juego..."
+                  placeholderTextColor="#999"
+                  value={search}
+                  onChangeText={setSearch}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => navigation.navigate("AddGame", { formType: "game", isEdit: false })}
+              >
+                <MaterialCommunityIcons name="plus" size={rw(6)} color="#fff" style={{ marginLeft: 0 }} />
+                <Text style={styles.btnText}>Agregar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
+            <FlatList
+              data={gamesFiltered}
+              keyExtractor={(item) => (item.idJuego || item.id).toString()}
+              renderItem={renderItem}
+              contentContainerStyle={styles.list}
+              numColumns={2}
+              showsVerticalScrollIndicator={false}
+              key={`${rw(100)}-${rh(100)}`} // Force re-render on orientation change
+            />
+          </View>
+        </>
+      )}
+    </View>
+  )
+}
+
+export default AdminLearnScreen
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fcfcfc',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 16,
-        textAlign: 'center',
-        color: '#000',
-    },
-    header: {
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        justifyContent: 'flex-start',
-        height: '24%',
-        paddingTop: 50,
-        paddingHorizontal: 10,
-        experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
-        //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
-    },
-    bodyContainer: {
-        width: '100%',
-        flex: 1,
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        backgroundColor: "#fcfcfc",
-        width: "100%",
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
-        marginTop: -25
-    },
-    list: {
-        paddingBottom: 0,
-    },
-   card: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 10,
-        margin: 8,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-        alignContent: 'flex-start',
-        alignItems: 'flex-start'
-    },
-    image: {
-        width: '100%',
-        //height: 200,
-        borderRadius: 8,
-        marginBottom: 8,
-        aspectRatio: 9 / 16,
-        alignSelf: 'center',
-        //resizeMode: 'center',
-    },
-    name: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        textAlign: 'left',
-    },
-    category: {
-        fontSize: 12,
-        color: '#777',
-        marginBottom: 4,
-    },
-    price: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#BACA16',
-        marginBottom: 8,
-    },
-    description: {
-        fontSize: 12,
-        color: '#555',
-        marginTop: 8,
-        textAlign: 'center',
-    },
-    button: {
-        backgroundColor: '#BACA16',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    button2: {
-        backgroundColor: '#f6c80d',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    button3: {
-        backgroundColor: '#597cff',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    detailsContainer: {
-        alignItems: 'center',
-    },
-    gif: {
-        width: 80,
-        height: 80,
-        marginTop: 10,
-    },
-    video: {
-        width: 150,
-        height: 300,
-        marginTop: 10,
-        borderRadius: 10,
-    },
-    buttons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginTop: 10,
-    },
-    addButton: {
-        flexDirection: 'row',
-        height: 50,
-        width: '30%',
-        backgroundColor: '#BACA16',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 10,
-        paddingHorizontal: 15,
-    },
-    btns: {
-
-        width: '100%',
-        justifyContent: 'space-around',
-        flexDirection: 'row',
-    },
-    btnText: {
-        textAlign: 'center',
-        fontSize: 18,
-        color: '#fff',
-        marginHorizontal: 5
-    },
-    searchBarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-        flex: 1,
-        minHeight: 50,
-        maxHeight: 50,
-        marginHorizontal: 10,
-        marginBottom: 35,
-    },
-    searchIcon: {
-        marginRight: 10,
-    },
-    searchBar: {
-        flex: 1,
-        fontSize: 16,
-        color: '#333',
-    },
-
-
-});
+  container: {
+    flex: 1,
+    backgroundColor: "#fcfcfc",
+  },
+  title: {
+    fontSize: rf(3.2),
+    fontWeight: "bold",
+    marginBottom: rh(2),
+    textAlign: "center",
+    color: "#fff",
+  },
+  header: {
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "flex-start",
+    height: rh(20),
+    paddingTop: rh(6),
+    paddingHorizontal: rw(3),
+  },
+  headerContent: {
+    width: "100%",
+    flexDirection: "column",
+    marginTop: 0,
+  },
+  sectionContainer: {
+    width: "100%",
+    zIndex: 1,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  bodyContainer: {
+    width: "100%",
+    flex: 1,
+    paddingVertical: rh(1),
+    paddingHorizontal: rw(1),
+    backgroundColor: "#fcfcfc",
+    borderTopLeftRadius: rw(6),
+    borderTopRightRadius: rw(6),
+    marginTop: -rh(6),
+    paddingTop: rh(8),
+  },
+  list: {
+    paddingBottom: rh(10),
+  },
+  card: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: rw(3),
+    padding: rw(2),
+    margin: rw(2),
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    alignContent: "flex-start",
+    alignItems: "flex-start",
+    maxWidth: rw(45),
+    minHeight: rh(35),
+  },
+  image: {
+    width: "100%",
+    borderRadius: rw(2),
+    marginBottom: rh(1),
+    aspectRatio: 9 / 16,
+    alignSelf: "center",
+  },
+  name: {
+    fontSize: rf(2.2),
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "left",
+  },
+  category: {
+    fontSize: rf(1.6),
+    color: "#777",
+    marginBottom: rh(0.5),
+  },
+  price: {
+    fontSize: rf(2),
+    fontWeight: "bold",
+    color: "#BACA16",
+    marginBottom: rh(1),
+  },
+  description: {
+    fontSize: rf(1.5),
+    color: "#555",
+    marginTop: rh(1),
+    textAlign: "center",
+  },
+  button: {
+    backgroundColor: "#BACA16",
+    paddingVertical: rh(0.8),
+    paddingHorizontal: rw(2),
+    borderRadius: rw(5),
+    marginTop: rh(1),
+    width: rw(10),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button2: {
+    backgroundColor: "#f6c80d",
+    paddingVertical: rh(0.8),
+    paddingHorizontal: rw(2),
+    borderRadius: rw(5),
+    marginTop: rh(1),
+    width: rw(10),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button3: {
+    backgroundColor: "#597cff",
+    paddingVertical: rh(0.8),
+    paddingHorizontal: rw(2),
+    borderRadius: rw(5),
+    marginTop: rh(1),
+    width: rw(10),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  detailsContainer: {
+    alignItems: "center",
+  },
+  addButton: {
+    flexDirection: 'row',
+    height: rh(5),
+    width: rw(30),
+    backgroundColor: '#BACA16',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: rw(3),
+    paddingHorizontal: rw(3),
+    // Sombra para Android
+    elevation: 4,
+    // Sombra para iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  btns: {
+    width: "100%",
+    justifyContent: "space-around",
+    flexDirection: "row",
+    marginTop: rh(11),
+    position: "absolute",
+    zIndex: 1,
+    alignSelf: "center",
+    paddingHorizontal: rw(5),
+  },
+  btnText: {
+    textAlign: "center",
+    fontSize: rf(2),
+    color: "#fff",
+    marginHorizontal: rw(1),
+  },
+  searchBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: rw(3),
+    paddingHorizontal: rw(4),
+    paddingVertical: rh(0.6),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    flex: 1,
+    minHeight: rh(5),
+    maxHeight: rh(6),
+    marginRight: rw(3),
+    marginBottom: rh(4),
+  },
+  searchIcon: {
+    marginRight: rw(2),
+  },
+  searchBar: {
+    flex: 1,
+    fontSize: rf(2),
+    color: '#333',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginVertical: rh(1),
+    paddingHorizontal: rw(2),
+    top: rh(16),
+    left: rw(2),
+    right: 0,
+  },
+  filterButton: {
+    paddingVertical: rh(1.2),
+    paddingHorizontal: rw(4),
+    backgroundColor: '#fcedb1',
+    borderColor: 'rgba(187, 202, 22, 0.48)',
+    borderWidth: 1,
+    borderRadius: rw(10),
+    marginHorizontal: rw(1.5),
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterButtonActive: {
+    backgroundColor: '#BACA16',
+  },
+  filterButtonText: {
+    color: '#333',
+    fontWeight: 'bold',
+    fontSize: rf(1.8),
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: rw(5),
+    top: -rh(5)
+  },
+  emptyText: {
+    fontSize: rf(2.5),
+    color: "#666",
+    textAlign: "center",
+    marginTop: rh(2),
+    fontWeight: "600",
+  },
+  emptySubtext: {
+    fontSize: rf(2),
+    color: "#999",
+    textAlign: "center",
+    marginTop: rh(1),
+    lineHeight: rf(2.5),
+  },
+})

@@ -1,4 +1,4 @@
-"use client"
+//"use client"
 
 import {
   View,
@@ -22,6 +22,7 @@ import * as ImagePicker from "expo-image-picker"
 import { actualizarProducto, crearProducto } from "../api/menu"
 import { actualizarMesero, crearMesero } from "../api/waiters"
 import { actualizarSena, crearSena } from "../api/sign"
+import { actualizarJuego, crearJuego } from "../api/learn"
 import { uploadImageToWasabi, uploadVideoToWasabi } from "../services/wasabi"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 import DropDownPicker from "react-native-dropdown-picker"
@@ -44,7 +45,7 @@ const FormScreen = () => {
 
   // Parámetros de la ruta
   const {
-    formType, // 'product', 'waiter', 'sign'
+    formType, // 'product', 'waiter', 'sign', 'game'
     isEdit = false,
     item = null,
   } = route.params || {}
@@ -67,7 +68,7 @@ const FormScreen = () => {
   const [edad, setEdad] = useState("")
   const [presentacion, setPresentacion] = useState("")
 
-  // Estados para señas
+  // Estados para señas y juegos
   const [video, setVideo] = useState("")
 
   // Estados comunes
@@ -113,6 +114,7 @@ const FormScreen = () => {
       setCategoria(item.categoria || "")
       setCodigo(item.codigo || "")
       setFoto(item.foto || "")
+      setValue(item.sena?.id || null)
     } else if (formType === "waiter") {
       setEdad(item.edad?.toString() || "")
       setPresentacion(item.presentacion || "")
@@ -120,6 +122,10 @@ const FormScreen = () => {
       setValue(item.condicion?.id || null)
     } else if (formType === "sign") {
       setVideo(item.video || "")
+    } else if (formType === "game") {
+      setDescripcion(item.descripcion || "")
+      setCategoria(item.categoria || "Juego educativo")
+      setVideo(item.foto || "") // En juegos, el video se guarda en 'foto'
     }
   }
 
@@ -157,6 +163,8 @@ const FormScreen = () => {
         await handleWaiterSave()
       } else if (formType === "sign") {
         await handleSignSave()
+      } else if (formType === "game") {
+        await handleGameSave()
       }
 
       const action = isEdit ? "actualizado" : "guardado"
@@ -186,20 +194,27 @@ const FormScreen = () => {
         Alert.alert("Campos incompletos", "Por favor, completa todos los campos obligatorios")
         return false
       }
-    } else if (formType === "sign") {
-      if (!video) {
+    } else if (formType === "sign" || formType === "game") {
+      /* if (!video) {
         Alert.alert("Campo requerido", "El video es obligatorio")
         return false
-      }
+      } */
     }
 
     return true
   }
 
+  const getFolderForType = (formType) => {
+    if (formType === "waiter") return "meseros";
+    if (formType === "sign" || formType === "game") return "sena";
+    return "producto";
+  };
+
   const handleProductSave = async () => {
-    let fotoUrl = foto
+    const folder = getFolderForType("product");
+    let fotoUrl = foto;
     if (foto && !foto.startsWith("http")) {
-      fotoUrl = await uploadImageToWasabi(foto)
+      fotoUrl = await uploadImageToWasabi(foto, folder);
     }
 
     const productoDto = {
@@ -211,20 +226,21 @@ const FormScreen = () => {
       status,
       idSena: value,
       foto: fotoUrl,
-    }
+    };
 
     if (isEdit) {
-      productoDto.id = item.id
-      await actualizarProducto(item.id, productoDto)
+      productoDto.id = item.id;
+      await actualizarProducto(item.id, productoDto);
     } else {
-      await crearProducto(productoDto)
+      await crearProducto(productoDto);
     }
-  }
+  };
 
   const handleWaiterSave = async () => {
-    let fotoUrl = foto
+    const folder = getFolderForType("waiter");
+    let fotoUrl = foto;
     if (foto && !foto.startsWith("http")) {
-      fotoUrl = await uploadImageToWasabi(foto)
+      fotoUrl = await uploadImageToWasabi(foto, folder);
     }
 
     const meseroDto = {
@@ -234,46 +250,71 @@ const FormScreen = () => {
       nombre,
       presentacion,
       status,
-    }
+    };
 
     if (isEdit) {
-      await actualizarMesero(item.id, meseroDto)
+      await actualizarMesero(item.id, meseroDto);
     } else {
-      await crearMesero(meseroDto)
+      await crearMesero(meseroDto);
     }
-  }
+  };
 
   const handleSignSave = async () => {
-    let videoUrl = video
+    const folder = getFolderForType("sign");
+    let videoUrl = video;
     if (video && !video.startsWith("http")) {
-      videoUrl = await uploadVideoToWasabi(video)
+      videoUrl = await uploadVideoToWasabi(video, folder);
     }
 
     const senaDto = {
       video: videoUrl,
       nombre,
       status,
-    }
+    };
 
     if (isEdit) {
-      await actualizarSena(item.id, senaDto)
+      await actualizarSena(item.id, senaDto);
     } else {
-      await crearSena(senaDto)
+      await crearSena(senaDto);
     }
-  }
+  };
+
+  const handleGameSave = async () => {
+    const folder = getFolderForType("game");
+    let videoUrl = video;
+    if (video && !video.startsWith("http")) {
+      videoUrl = await uploadVideoToWasabi(video, folder);
+    }
+
+    const juegoDto = {
+      nombre,
+      foto: videoUrl, // En juegos, el video se guarda en 'foto'
+      status,
+    };
+
+    if (isEdit) {
+      const gameId = item.idJuego || item.id;
+      await actualizarJuego(gameId, juegoDto);
+    } else {
+      await crearJuego(juegoDto);
+    }
+  };
 
   const handleSelectMedia = async () => {
-    const mediaType = formType === "sign" ? ["videos", "images", "livePhotos"] : ImagePicker.MediaTypeOptions.Images
+    const mediaType =
+      formType === "sign" || formType === "game"
+        ? ["videos"]
+        : ImagePicker.MediaTypeOptions.Images
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: mediaType,
       allowsEditing: true,
-      aspect: formType === "sign" ? [9, 16] : [4, 3],
+      aspect: formType === "sign" || formType === "game" ? [9, 16] : [4, 3],
       quality: 1,
     })
 
     if (!result.canceled) {
-      if (formType === "sign") {
+      if (formType === "sign" || formType === "game") {
         setVideo(result.assets[0].uri)
       } else {
         setFoto(result.assets[0].uri)
@@ -303,6 +344,8 @@ const FormScreen = () => {
         return "Mesero"
       case "sign":
         return "Seña"
+      case "game":
+        return "Juego"
       default:
         return "Elemento"
     }
@@ -405,7 +448,21 @@ const FormScreen = () => {
     </>
   )
 
+  const renderGameFields = () => (
+    <>
+      <Text style={[styles.label, { color: theme.textColor }]}>Video del juego</Text>
+      <TouchableOpacity style={[styles.input, styles.mediaButton]} onPress={handleSelectMedia}>
+        <Text style={styles.mediaButtonText}>{video ? "Cambiar video" : "Seleccionar video"}</Text>
+      </TouchableOpacity>
+      {video && (
+        <Video source={{ uri: video }} style={styles.videoPreview} resizeMode={ResizeMode.COVER} useNativeControls />
+      )}
+    </>
+  )
+
   const renderSignFields = () => (
+    
+    
     <>
       <Text style={[styles.label, { color: theme.textColor }]}>Video</Text>
       <TouchableOpacity style={[styles.input, styles.mediaButton]} onPress={handleSelectMedia}>
@@ -418,7 +475,7 @@ const FormScreen = () => {
   )
 
   const renderMediaSection = () => {
-    if (formType === "sign") return null // Ya se renderiza en renderSignFields
+    if (formType === "sign" || formType === "game") return null // Ya se renderiza en sus respectivos campos
 
     return (
       <>
@@ -461,9 +518,7 @@ const FormScreen = () => {
                 onChangeText={setNombre}
               />
 
-              {formType === "product" && renderProductFields()}
-              {formType === "waiter" && renderWaiterFields()}
-              {formType === "sign" && renderSignFields()}
+              
 
               {isEdit && (
                 <View style={styles.switchContainer}>
@@ -477,7 +532,10 @@ const FormScreen = () => {
                   <Text style={[styles.switchText, { color: theme.textColor }]}>{status ? "Activo" : "Inactivo"}</Text>
                 </View>
               )}
-
+{formType === "product" && renderProductFields()}
+              {formType === "waiter" && renderWaiterFields()}
+              {formType === "sign" && renderSignFields()}
+              {formType === "game" && renderGameFields()}
               {renderMediaSection()}
 
               <TouchableOpacity

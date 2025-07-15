@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 const WelcomeScreen = ({ navigation }) => {
-    const [selectedButton, setSelectedButton] = useState('UserHome');
+    const [selectedButton, setSelectedButton] = useState('UserApp');
     const handlePress = (button) => {
         setSelectedButton(button);
         navigation.navigate(button);
@@ -36,14 +36,14 @@ const WelcomeScreen = ({ navigation }) => {
                             <TouchableOpacity
                                 style={[
                                     styles.button,
-                                    selectedButton === 'UserHome' && styles.buttonSelected,
+                                    selectedButton === 'UserApp' && styles.buttonSelected,
                                 ]}
-                                onPress={() => handlePress('UserHome')}
+                                onPress={() => handlePress('UserApp')}
                             >
                                 <Text
                                     style={[
                                         styles.buttonText,
-                                        selectedButton === 'UserHome' && styles.buttonTextSelected,
+                                        selectedButton === 'UserApp' && styles.buttonTextSelected,
                                     ]}
                                 >
                                     ¡Ordena ya!

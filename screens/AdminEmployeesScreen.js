@@ -10,8 +10,12 @@ import {
     TextInput,
     Alert
 } from 'react-native';
+import {
+    responsiveWidth as rw,
+    responsiveHeight as rh,
+    responsiveFontSize as rf,
+  } from "react-native-responsive-dimensions"
 import { eliminarMesero, obtenerTodosLosMeseros, meserosActivos, meserosInactivos } from '../api/waiters';
-import axios from 'axios';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -85,11 +89,15 @@ const AdminEmployeesScreen = ({ navigation }) => {
                 response = await meserosActivos();
             } else if (newFilter === 'inactivos') {
                 response = await meserosInactivos();
+                console.log("inactivo response: ",response);
+                
             } else {
                 response = await obtenerTodosLosMeseros();
             }
             if (response.data.tipo === "SUCCESS") {
                 setWaiters(response.data.datos);
+            }else if (response.data.tipo === "WARNING") {
+                setWaiters([]);   
             }
         } catch (error) {
             console.error("Error al filtrar meseros:", error);
@@ -118,7 +126,7 @@ const AdminEmployeesScreen = ({ navigation }) => {
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={styles.button}
+                    style={styles.button3}
                     onPress={() => handleDelete(item.id)}
                 >
                     <Ionicons name="trash" size={24} color="#fff" />
@@ -131,22 +139,11 @@ const AdminEmployeesScreen = ({ navigation }) => {
         <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
             <LinearGradient colors={theme.headerGradient} style={styles.header}>
                 <View style={styles.headerContent}>
-                    <Text style={[styles.title, { color: theme.textColor }]}>Meseros</Text>
+                    <Text style={[styles.title]}>Meseros</Text>
 
                 </View>
             </LinearGradient>
-            {waiters.length === 0 ? (
-                <>
-                    <View style={styles.bodyContainer}>
-                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                            No hay empleados disponibles
-                        </Text>
-                    </View>
-
-                </>
-            ) : (
-                <>
-                    <View style={styles.sectionContainer}>
+            <View style={styles.sectionContainer}>
                         <View style={styles.btns}>
                             <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
                                 <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
@@ -159,7 +156,7 @@ const AdminEmployeesScreen = ({ navigation }) => {
                                 />
                             </View>
 
-                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddProduct')}>
+                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddWaiter')}>
                                 <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
                                 <Text style={styles.btnText}>Agregar</Text>
                             </TouchableOpacity>
@@ -191,6 +188,18 @@ const AdminEmployeesScreen = ({ navigation }) => {
                         </View>
                     </View>
                     {/* Fin Filtros */}
+            {waiters.length === 0 ? (
+                <>
+                    <View style={styles.bodyContainer}>
+                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                            No hay empleados disponibles
+                        </Text>
+                    </View>
+
+                </>
+            ) : (
+                <>
+                    
                     <View style={styles.bodyContainer} >
                         <FlatList
                             data={filteredWaiters}
@@ -213,86 +222,73 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fcfcfc',
-
     },
     title: {
-        fontSize: 24,
+        fontSize: rf(3),
         fontWeight: 'bold',
-        marginBottom: 16,
+        marginBottom: rh(2),
         textAlign: 'center',
-        color: '#000',
-        height: 30,
+        color: '#fff',
+        height: rh(4),
     },
     header: {
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        justifyContent: 'flex-start',
-        height: '20%',
-        paddingTop: 50,
-        paddingHorizontal: 10,
-        
-        //experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
-        //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    justifyContent: 'flex-start',
+    height: rh(20),
+    paddingTop: rh(6),
+    paddingHorizontal: rw(3),
     },
     headerContent: {
-        width: '100%',
-        //justifyContent: 'space-between',
-        flexDirection: 'column',
-        marginTop: 0,
+    width: '100%',
+    flexDirection: 'column',
+    marginTop: 0,
     },
     sectionContainer: {
-        width: '100%',
-        zIndex: 1,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        paddingBottom: 100,
+    width: '100%',
+    zIndex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     },
     bodyContainer: {
-        width: '100%',
-        flex: 1,
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        backgroundColor: "#fcfcfc",
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
-        marginTop: -55,
-        paddingBottom: 80,
-        paddingTop: 70,
-        zIndex: 0,
+    width: '100%',
+    flex: 1,
+    paddingHorizontal: rw(2),
+    backgroundColor: "#fcfcfc",
+    borderTopLeftRadius: rw(6),
+    borderTopRightRadius: rw(6),
+    marginTop: -rh(6),
+    paddingTop: rh(8),
     },
     list: {
-        paddingBottom: 10,
+    paddingBottom: rh(1),
     },
     card: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 10,
-        margin: 8,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-        alignContent: 'flex-start',
-        alignItems: 'flex-start',
-        maxWidth: '45%',
-
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: rw(3),
+    padding: rw(2),
+    margin: rw(2),
+    alignItems: 'flex-start',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    maxWidth: rw(45),
     },
     image: {
-        width: '100%',
-        height: 100,
-        borderRadius: 8,
-        marginBottom: 8,
-        aspectRatio: 1.5,
+        width: rw(40),
+        height: rh(18),
+        borderRadius: rw(2),
+        marginBottom: rh(1),
+        //aspectRatio: 1.5,
         alignSelf: 'center',
-        //resizeMode: 'center',
     },
     name: {
-        fontSize: 16,
+        fontSize: rf(2),
         fontWeight: 'bold',
         color: '#333',
         textAlign: 'left',
@@ -358,90 +354,94 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
-        marginTop: 10,
-    },
-    addButton: {
+        marginTop: rh(1),
+      },
+      addButton: {
         flexDirection: 'row',
-        height: 40,
-        width: '30%',
+        height: rh(5),
+        width: rw(30),
         backgroundColor: '#BACA16',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 10,
-        paddingHorizontal: 15,
-    },
-    btns: {
-        height: 40,
+        borderRadius: rw(3),
+        paddingHorizontal: rw(3),
+        // Sombra para Android
+        elevation: 4,
+        // Sombra para iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      btns: {
+        height: rh(5),
         width: '90%',
         justifyContent: 'flex-start',
         flexDirection: 'row',
-        marginTop: 90,
+        marginTop: rh(11),
         position: 'absolute',
         zIndex: 1,
         alignSelf: 'center',
-    },
-    btnText: {
+      },
+      btnText: {
         textAlign: 'center',
-        fontSize: 18,
+        fontSize: rf(2),
         color: '#fff',
-        marginHorizontal: 5
-    },
-    searchBarContainer: {
+        marginHorizontal: rw(1),
+      },
+      searchBarContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'white',
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 5,
+        borderRadius: rw(3),
+        paddingHorizontal: rw(4),
+        paddingVertical: rh(0.6),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
         flex: 1,
-        minHeight: 40,
-        maxHeight: 45,
-        marginRight: 10,
-        marginBottom: 35,
-
-    },
-    searchIcon: {
-        marginRight: 10,
-    },
-    searchBar: {
+        minHeight: rh(5),
+        maxHeight: rh(6),
+        marginRight: rw(3),
+        marginBottom: rh(4),
+      },
+      searchIcon: {
+        marginRight: rw(2),
+      },
+      searchBar: {
         flex: 1,
-        fontSize: 16,
+        fontSize: rf(2),
         color: '#333',
-    },
-    // --- Filtros ---
-    filterContainer: {
+      },
+      filterContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
-        marginVertical: 10,
-        paddingHorizontal: 5,
-        zIndex: 1,
-        top: 130,
-        left: 10,
+        marginVertical: rh(1),
+        paddingHorizontal: rw(2),
+        top: rh(16),
+        left: rw(2),
         right: 0,
-    },
-    filterButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        backgroundColor: '#fcedb1', // Color de fondo amarillo claro
-        //backgroundColor: 'rgba(246, 199, 13, 0.2)', //amarillo transparente F6C80D
-        borderColor: 'rgba(187, 202, 22, 0.48)',//'#BACA16' transparente,
+      },
+      filterButton: {
+        paddingVertical: rh(1.2),
+        paddingHorizontal: rw(4),
+        backgroundColor: '#fcedb1',
+        borderColor: 'rgba(187, 202, 22, 0.48)',
         borderWidth: 1,
-        borderRadius: 20,
-        marginHorizontal: 5,
+        borderRadius: rw(10),
+        marginHorizontal: rw(1.5),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    filterButtonActive: {
+      },
+      filterButtonActive: {
         backgroundColor: '#BACA16',
-    },
-    filterButtonText: {
+      },
+      filterButtonText: {
         color: '#333',
         fontWeight: 'bold',
-    },
+        fontSize: rf(1.8),
+      },
 });

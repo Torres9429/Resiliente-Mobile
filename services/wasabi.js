@@ -2,8 +2,8 @@ import * as FileSystem from 'expo-file-system';
 import { apiMultipart } from '../api/api';
 
 const endpoint = '/api/upload';
-const folder = 'productos';
-export const uploadImageToWasabi = async (uri) => {
+//const folder = 'productos';
+export const uploadImageToWasabi = async (uri, folder) => {
   try {
     const fileInfo = await FileSystem.getInfoAsync(uri);
     if (!fileInfo.exists) {
@@ -14,14 +14,21 @@ export const uploadImageToWasabi = async (uri) => {
     const match = /\.(\w+)$/.exec(fileName);
     const type = match ? `image/${match[1]}` : `image`;
 
+    const folderName = folder || 'productos'; // fallback
+
+    console.log("==> Subiendo imagen a Wasabi:");
+    console.log("- Archivo:", fileName);
+    console.log("- Tipo:", type);
+    console.log("- Carpeta:", folderName);
+
     const formData = new FormData();
     formData.append('file', {
       uri,
       name: fileName,
       type,
     });
-    formData.append('fileName', fileName); 
-    formData.append('folder', folder);
+    formData.append('fileName', fileName);
+    formData.append('folder', folderName);
     const response = await apiMultipart.post(endpoint, formData);
     /* const response = await fetch('http://192.168.0.14:8080/api/upload-to-wasabi', {
       method: 'POST',
@@ -44,7 +51,7 @@ export const uploadImageToWasabi = async (uri) => {
 };
 
 
-export const uploadVideoToWasabi = async (uri) => {
+export const uploadVideoToWasabi = async (uri, folder) => {
   try {
     const fileInfo = await FileSystem.getInfoAsync(uri);
     if (!fileInfo.exists) {
@@ -59,8 +66,13 @@ export const uploadVideoToWasabi = async (uri) => {
     //const type = videoTypes.includes(ext) ? `video/${ext}` : 'video/mp4';
     const type = ext === 'mov' ? 'video/quicktime' : videoTypes.includes(ext) ? `video/${ext}` : 'video/mp4';
 
+    const folderName = folder || 'productos'; // fallback para videos
 
-    console.log("Subiendo video a Wasabi:", uri, fileName, type);
+    console.log("🎥 Subiendo video a Wasabi:");
+    console.log("- Archivo:", fileName);
+    console.log("- Tipo:", type);
+    console.log("- Carpeta:", folderName);
+
     const formData = new FormData();
     formData.append('file', {
       uri,
@@ -68,6 +80,7 @@ export const uploadVideoToWasabi = async (uri) => {
       type,
     });
     formData.append('fileName', fileName);
+    formData.append('folder', folderName);
     console.log("Datos del formulario:", formData);
     // Aquí usamos apiMultipart para enviar el video
     
