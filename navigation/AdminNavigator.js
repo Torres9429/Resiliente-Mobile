@@ -322,7 +322,7 @@ const AdminNavigator = () => {
           ),
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="UserInterface"
         component={UserStack}
         options={{
@@ -330,7 +330,7 @@ const AdminNavigator = () => {
             <TabIcon name="monitor-dashboard" color={color} focused={focused} theme={theme} />
           ),
         }}
-      />
+      /> */}
     </Tab.Navigator>
   )
 }

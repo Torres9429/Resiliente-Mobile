@@ -148,7 +148,7 @@ export default UserNavigator; */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { View, StyleSheet } from "react-native"
-import { MaterialCommunityIcons } from "@expo/vector-icons"
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons"
 
 import { useTheme } from "../context/ThemeContext"
 
@@ -174,7 +174,11 @@ const OrderStack = () => (
 
 const TabIcon = ({ name, color, focused, theme }) => (
   <View style={[styles.iconContainer, focused && { backgroundColor: theme.primaryColor + "20" }]}>
-    <MaterialCommunityIcons name={name} size={24} color={color} />
+    {name === "game-controller" ? (
+      <Ionicons name="game-controller" size={24} color={color} />
+    ) : (
+      <MaterialCommunityIcons name={name} size={24} color={color} />
+    )}
   </View>
 )
 
@@ -228,7 +232,7 @@ const UserNavigator = () => {
         component={LearnScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="hand-clap" color={color} focused={focused} theme={theme} />
+            <TabIcon name="game-controller" color={color} focused={focused} theme={theme} />
           ),
         }}
       />
