@@ -18,8 +18,8 @@ import {
     responsiveWidth as rw,
     responsiveHeight as rh,
     responsiveFontSize as rf,
-  } from "react-native-responsive-dimensions"
-import {eliminarSena, obtenerTodasLasSenas, senasActivas, senasInactivas} from '../api/sign';
+} from "react-native-responsive-dimensions"
+import { eliminarSena, obtenerTodasLasSenas, senasActivas, senasInactivas } from '../api/sign';
 import { CartContext } from '../context/CartContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -62,18 +62,18 @@ const AdminSignScreen = () => {
     const signsFiltered = signItems.filter(sign =>
         sign.nombre.toLowerCase().includes(search.toLowerCase())
     )
-    
-        const handleDelete = async (id) => {
-            try {
-                await eliminarSena(id);
-                Alert.alert("Éxito", "Seña eliminada correctamente", [
-                    { text: "OK" },
-                ]);
-            } catch (error) {
-                console.error("Error al eliminar seña:", error);
-                Alert.alert("Error", "No se pudo eliminar la seña, por favor intente nuevamente.");
-            }
+
+    const handleDelete = async (id) => {
+        try {
+            await eliminarSena(id);
+            Alert.alert("Éxito", "Seña eliminada correctamente", [
+                { text: "OK" },
+            ]);
+        } catch (error) {
+            console.error("Error al eliminar seña:", error);
+            Alert.alert("Error", "No se pudo eliminar la seña, por favor intente nuevamente.");
         }
+    }
 
     useFocusEffect(
         React.useCallback(() => {
@@ -92,21 +92,21 @@ const AdminSignScreen = () => {
             };
             fetchSigns();
             // Probar si la URL es accesible
-        if (videoUri) {
-            fetch(videoUri)
-                .then(response => {
-                    console.log('Fetch response status admin:', response.status, ' uri: ', videoUri);
-                    console.log('Fetch response headers:', response.headers);
-                })
-                .catch(error => {
-                    console.log('Fetch error:', error);
-                });
-        }
+            if (videoUri) {
+                fetch(videoUri)
+                    .then(response => {
+                        console.log('Fetch response status admin:', response.status, ' uri: ', videoUri);
+                        console.log('Fetch response headers:', response.headers);
+                    })
+                    .catch(error => {
+                        console.log('Fetch error:', error);
+                    });
+            }
             return () => {
                 // Opcional: limpiar estado 
             };
         }, [])
-        
+
     );
 
     const handleToggle = (index) => {
@@ -119,8 +119,8 @@ const AdminSignScreen = () => {
     }
     const handleEdit = (item) => {
         console.log('nav: ', item);
-        
-        navigation.navigate('SignForm', { isEdit: true, item: item });
+
+        navigation.navigate('EditSign', { isEdit: true, item: item });
     }
     const handleFilterChange = async (newFilter) => {
         setFilter(newFilter);
@@ -135,7 +135,7 @@ const AdminSignScreen = () => {
             }
             if (response.data.tipo === "SUCCESS") {
                 setSignItems(response.data.datos);
-            }else if (response.data.tipo === "WARNING"){
+            } else if (response.data.tipo === "WARNING") {
                 setSignItems([]);
             }
         } catch (error) {
@@ -146,12 +146,12 @@ const AdminSignScreen = () => {
 
     const renderItem = ({ item, index }) => (
         <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)} onPress={() => navigation.navigate('DetallesEdit', { item })}*/>
-            
+
             {item.video && item.video !== "" ? (
                 <Video
                     source={{ uri: item.video }}
                     style={styles.video}
-                resizeMode={ResizeMode.COVER}
+                    resizeMode={ResizeMode.COVER}
                     isLooping
                     useNativeControls
                     onLoad={() => console.log('Video cargado exitosamente')}
@@ -195,441 +195,148 @@ const AdminSignScreen = () => {
 
     return (
         <View style={styles.container}>
-                <LinearGradient colors={theme.headerGradient} style={styles.header}>
-                    <View style={styles.headerContent}>
-                        <Text style={styles.title}>Señas</Text>
-                    </View>
-                </LinearGradient>
-                    <View style={styles.sectionContainer}>
-                        <View style={styles.btns}>
-                            <View style={styles.searchBarContainer}>
-                                <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
-                                <TextInput
-                                    style={styles.searchBar}
-                                    placeholder="Buscar seña..."
-                                    placeholderTextColor="#999"
-                                    value={search}
-                                    onChangeText={setSearch}
-                                />
-                            </View>
-                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddSign')}>
-                                <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
-                        <Text style={styles.btnText}>Agregar</Text>
-                            </TouchableOpacity>
-                        </View>
-                            {/* Filtros */}
-                            <View style={styles.filterContainer}>
-                                <TouchableOpacity
-                                    style={[styles.filterButton, filter === 'activas' && styles.filterButtonActive]}
-                                    onPress={() => handleFilterChange('activas')}
-                                >
-                                    <Text style={styles.filterButtonText}>Activos</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.filterButton, filter === 'inactivas' && styles.filterButtonActive]}
-                                    onPress={() => handleFilterChange('inactivas')}
-                                >
-                                    <Text style={styles.filterButtonText}>Inactivos</Text>
-                                </TouchableOpacity>
-                                {filter !== 'todos' && (
-                                    <TouchableOpacity
-                                        style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
-                                        onPress={() => handleFilterChange('todos')}
-                                    >
-                                        <Text style={styles.filterButtonText}>Borrar filtros</Text>
-                                        <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                    </View>
-                    {signItems.length === 0 ? (
-                        <>
-                            <View style={styles.bodyContainer}>
-                                <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                                No hay productos disponibles
-                                </Text>
-                            </View>
-                        
-                        </>
-                    ) : (
-                        <>
-                        
-                        <View style={styles.bodyContainer}>
-                            <FlatList
-                                data={signsFiltered}
-                                keyExtractor={(item) => item.id.toString()}
-                                renderItem={renderItem}
-                                contentContainerStyle={styles.list}
-                                numColumns={2}
-                                showsVerticalScrollIndicator={false}
-                            />
-                            </View>
-                        </>
-                    )}
-                <CustomModal
-                    visible={modalVisible}
-                    videoUri={videoUri}
-                    onClose={() => setModalVisible(false)}
-                />
+            <LinearGradient colors={theme.headerGradient} style={styles.header}>
+                <View style={styles.headerContent}>
+                    <Text style={styles.title}>Señas</Text>
                 </View>
+            </LinearGradient>
+            <View style={styles.sectionContainer}>
+                <View style={styles.btns}>
+                    <View style={styles.searchBarContainer}>
+                        <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
+                        <TextInput
+                            style={styles.searchBar}
+                            placeholder="Buscar seña..."
+                            placeholderTextColor="#999"
+                            value={search}
+                            onChangeText={setSearch}
+                        />
+                    </View>
+                    <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddSign')}>
+                        <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
+                        <Text style={styles.btnText}>Agregar</Text>
+                    </TouchableOpacity>
+                </View>
+                {/* Filtros */}
+                <View style={styles.filterContainer}>
+                    <TouchableOpacity
+                        style={[styles.filterButton, filter === 'activas' && styles.filterButtonActive]}
+                        onPress={() => handleFilterChange('activas')}
+                    >
+                        <Text style={styles.filterButtonText}>Activos</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.filterButton, filter === 'inactivas' && styles.filterButtonActive]}
+                        onPress={() => handleFilterChange('inactivas')}
+                    >
+                        <Text style={styles.filterButtonText}>Inactivos</Text>
+                    </TouchableOpacity>
+                    {filter !== 'todos' && (
+                        <TouchableOpacity
+                            style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
+                            onPress={() => handleFilterChange('todos')}
+                        >
+                            <Text style={styles.filterButtonText}>Borrar filtros</Text>
+                            <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+            {signItems.length === 0 ? (
+                <>
+                    <View style={styles.bodyContainer}>
+                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
+                            No hay productos disponibles
+                        </Text>
+                    </View>
+
+                </>
+            ) : (
+                <>
+
+                    <View style={styles.bodyContainer}>
+                        <FlatList
+                            data={signsFiltered}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={renderItem}
+                            contentContainerStyle={styles.list}
+                            numColumns={2}
+                            showsVerticalScrollIndicator={false}
+                        />
+                    </View>
+                </>
+            )}
+            <CustomModal
+                visible={modalVisible}
+                videoUri={videoUri}
+                onClose={() => setModalVisible(false)}
+            />
+        </View>
     );
 };
 
 export default AdminSignScreen;
 
-/* const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fcfcfc',
-    },
-    title: {
-    fontSize: rf(3),
-        fontWeight: 'bold',
-    marginBottom: rh(2),
-        textAlign: 'center',
-        color: '#000',
-    height: rh(4),
-    },
-    header: {
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        justifyContent: 'flex-start',
-    height: rh(20),
-    paddingTop: rh(6),
-    paddingHorizontal: rw(3),
-    },
-    headerContent: {
-    width: '100%',
-    flexDirection: 'column',
-    marginTop: 0,
-    },
-    sectionContainer: {
-    width: '100%',
-    zIndex: 1,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    },
-    bodyContainer: {
-        width: '100%',
-        flex: 1,
-    paddingHorizontal: rw(2),
-        backgroundColor: "#fcfcfc",
-    borderTopLeftRadius: rw(6),
-    borderTopRightRadius: rw(6),
-    marginTop: -rh(6),
-    paddingTop: rh(8),
-    },
-    list: {
-    paddingBottom: rh(1),
-    },
-   card: {
-        flex: 1,
-        backgroundColor: '#fff',
-    borderRadius: rw(3),
-    padding: rw(2),
-    margin: rw(2),
-    alignItems: 'flex-start',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    maxWidth: rw(45),
-    },
-      image: {
-        width: "100%",
-        borderRadius: rw(2),
-        marginBottom: rh(1),
-        aspectRatio: 9 / 16,
-        alignSelf: "center",
-      },
-      name: {
-        fontSize: rf(2.2),
-        fontWeight: "bold",
-        color: "#333",
-        textAlign: "left",
-      },
-      category: {
-        fontSize: rf(1.6),
-        color: "#777",
-        marginBottom: rh(0.5),
-      },
-      price: {
-        fontSize: rf(2),
-        fontWeight: "bold",
-        color: "#BACA16",
-        marginBottom: rh(1),
-      },
-      description: {
-        fontSize: rf(1.5),
-        color: "#555",
-        marginTop: rh(1),
-        textAlign: "center",
-      },
-      button: {
-        backgroundColor: "#BACA16",
-        paddingVertical: rh(0.8),
-        paddingHorizontal: rw(2),
-        borderRadius: rw(5),
-        marginTop: rh(1),
-        width: rw(10),
-        justifyContent: "center",
-        alignItems: "center",
-      },
-      button2: {
-        backgroundColor: "#f6c80d",
-        paddingVertical: rh(0.8),
-        paddingHorizontal: rw(2),
-        borderRadius: rw(5),
-        marginTop: rh(1),
-        width: rw(10),
-        justifyContent: "center",
-        alignItems: "center",
-      },
-      button3: {
-        backgroundColor: "#597cff",
-        paddingVertical: rh(0.8),
-        paddingHorizontal: rw(2),
-        borderRadius: rw(5),
-        marginTop: rh(1),
-        width: rw(10),
-        justifyContent: "center",
-        alignItems: "center",
-      },
-      detailsContainer: {
-        alignItems: "center",
-      },
-      addButton: {
-        flexDirection: "row",
-        height: rh(6),
-        width: rw(30),
-        backgroundColor: "#BACA16",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: rw(3),
-        paddingHorizontal: rw(3),
-      },
-      btns: {
-        width: "100%",
-        justifyContent: "space-around",
-        flexDirection: "row",
-        marginTop: rh(11),
-        position: "absolute",
-        zIndex: 1,
-        alignSelf: "center",
-        paddingHorizontal: rw(5),
-      },
-      btnText: {
-        textAlign: "center",
-        fontSize: rf(2),
-        color: "#fff",
-        marginHorizontal: rw(1),
-      },
-      searchBarContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "white",
-        borderRadius: rw(3),
-        paddingHorizontal: rw(4),
-        paddingVertical: rh(1.5),
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-        flex: 1,
-        minHeight: rh(6),
-        maxHeight: rh(6),
-        marginHorizontal: rw(3),
-        marginBottom: rh(4),
-      },
-      searchIcon: {
-        marginRight: rw(2),
-      },
-      searchBar: {
-        flex: 1,
-        fontSize: rf(2),
-        color: "#333",
-      },
-      emptyContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: rw(5),
-      },
-      emptyText: {
-        fontSize: rf(2.5),
-        color: "#666",
-        textAlign: "center",
-        marginTop: rh(2),
-        fontWeight: "600",
-      },
-      emptySubtext: {
-        fontSize: rf(2),
-        color: "#999",
-        textAlign: "center",
-        marginTop: rh(1),
-        lineHeight: rf(2.5),
-      },
-    
-    video: {
-        width: rw(40),
-        height: rh(35),
-        marginTop: rh(1),
-        borderRadius: rw(2),
-      },
-    buttons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginTop: rh(1),
-      },
-      addButton: {
-        flexDirection: 'row',
-        height: rh(5),
-        width: rw(30),
-        backgroundColor: '#BACA16',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: rw(3),
-        paddingHorizontal: rw(3),
-      },
-      btns: {
-        height: rh(5),
-        width: '90%',
-        justifyContent: 'flex-start',
-        flexDirection: 'row',
-        marginTop: rh(11),
-        position: 'absolute',
-        zIndex: 1,
-        alignSelf: 'center',
-      },
-      btnText: {
-        textAlign: 'center',
-        fontSize: rf(2),
-        color: '#fff',
-        marginHorizontal: rw(1),
-      },
-      searchBarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: rw(3),
-        paddingHorizontal: rw(4),
-        paddingVertical: rh(0.6),
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-        flex: 1,
-        minHeight: rh(5),
-        maxHeight: rh(6),
-        marginRight: rw(3),
-        marginBottom: rh(4),
-      },
-      searchIcon: {
-        marginRight: rw(2),
-      },
-      searchBar: {
-        flex: 1,
-        fontSize: rf(2),
-        color: '#333',
-      },
-      filterContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        marginVertical: rh(1),
-        paddingHorizontal: rw(2),
-        top: rh(16),
-        left: rw(2),
-        right: 0,
-      },
-      filterButton: {
-        paddingVertical: rh(1.2),
-        paddingHorizontal: rw(4),
-        backgroundColor: '#fcedb1',
-        borderColor: 'rgba(187, 202, 22, 0.48)',
-        borderWidth: 1,
-        borderRadius: rw(10),
-        marginHorizontal: rw(1.5),
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-      },
-      filterButtonActive: {
-        backgroundColor: '#BACA16',
-      },
-      filterButtonText: {
-        color: '#333',
-        fontWeight: 'bold',
-        fontSize: rf(1.8),
-      },
-
-
-}); */
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fcfcfc',
     },
     title: {
-    fontSize: rf(3),
-    fontWeight: 'bold',
-    marginBottom: rh(2),
-    textAlign: 'center',
-    color: '#fff',
-    height: rh(4),
+        fontSize: rf(3),
+        fontWeight: 'bold',
+        marginBottom: rh(2),
+        textAlign: 'center',
+        color: '#fff',
+        height: rh(4),
     },
     header: {
-    flexDirection: "column",
-    alignItems: "center",
-    width: "100%",
-    justifyContent: 'flex-start',
-    height: rh(20),
-    paddingTop: rh(6),
-    paddingHorizontal: rw(3),
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        justifyContent: 'flex-start',
+        height: rh(20),
+        paddingTop: rh(6),
+        paddingHorizontal: rw(3),
     },
     headerContent: {
-    width: '100%',
-    flexDirection: 'column',
-    marginTop: 0,
+        width: '100%',
+        flexDirection: 'column',
+        marginTop: 0,
     },
     sectionContainer: {
-    width: '100%',
-    zIndex: 1,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+        width: '100%',
+        zIndex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
     },
     bodyContainer: {
-    width: '100%',
-    flex: 1,
-    paddingHorizontal: rw(2),
-    backgroundColor: "#fcfcfc",
-    borderTopLeftRadius: rw(6),
-    borderTopRightRadius: rw(6),
-    marginTop: -rh(6),
-    paddingTop: rh(8),
+        width: '100%',
+        flex: 1,
+        paddingHorizontal: rw(2),
+        backgroundColor: "#fcfcfc",
+        borderTopLeftRadius: rw(6),
+        borderTopRightRadius: rw(6),
+        marginTop: -rh(6),
+        paddingTop: rh(8),
     },
     list: {
-    paddingBottom: rh(1),
+        paddingBottom: rh(1),
     },
     card: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: rw(3),
-    padding: rw(2),
-    margin: rw(2),
-    alignItems: 'flex-start',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    maxWidth: rw(45),
+        flex: 1,
+        backgroundColor: '#fff',
+        borderRadius: rw(3),
+        padding: rw(2),
+        margin: rw(2),
+        alignItems: 'flex-start',
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+        maxWidth: rw(45),
     },
     image: {
         width: rw(40),
@@ -777,7 +484,7 @@ const styles = StyleSheet.create({
         fontSize: rf(2),
         color: '#333',
     },
-      filterContainer: {
+    filterContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
         marginVertical: rh(1),
@@ -785,8 +492,8 @@ const styles = StyleSheet.create({
         top: rh(16),
         left: rw(2),
         right: 0,
-      },
-      filterButton: {
+    },
+    filterButton: {
         paddingVertical: rh(1.2),
         paddingHorizontal: rw(4),
         backgroundColor: '#fcedb1',
@@ -797,13 +504,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-      },
-      filterButtonActive: {
+    },
+    filterButtonActive: {
         backgroundColor: '#BACA16',
-      },
-      filterButtonText: {
+    },
+    filterButtonText: {
         color: '#333',
         fontWeight: 'bold',
         fontSize: rf(1.8),
-      },
+    },
 });

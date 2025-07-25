@@ -589,6 +589,7 @@ const styles = StyleSheet.create({
     marginBottom: rh(1),
     textAlign: "center",
     color: "#fff",
+    top:rh(1.2)
   },
   subtitle: {
     fontSize: rf(2),
@@ -597,6 +598,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: rw(3),
     color: "#fff",
     opacity: 0.9,
+    top:rh(2)
   },
   label: {
     fontSize: rf(2.2),

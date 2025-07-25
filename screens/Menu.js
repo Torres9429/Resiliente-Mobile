@@ -174,81 +174,7 @@ const Menu = () => {
         </TouchableOpacity>
     );
 
-    {/*return (
-        
-         <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-            <LinearGradient colors={theme.headerGradient} style={styles.header}>
-                <View style={styles.headerContent}>
-                    <Text style={[styles.title, { color: theme.textColor }]}>Menu</Text>
-
-                </View>
-            </LinearGradient>
-
-            {menuItems.length === 0 ? (
-                <>
-                    <View style={styles.bodyContainer}>
-                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                            No hay productos disponibles
-                        </Text>
-                    </View>
-
-                </>
-            ) : (
-                <>
-                    <View style={[styles.sectionContainer, { backgroundColor: theme.backgroundColor }]}>
-                        <View style={styles.btns}>
-                            <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
-                                <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
-                                <TextInput
-                                    style={styles.searchBar}
-                                    placeholder="Buscar producto..."
-                                    placeholderTextColor="#999"
-                                    value={search}
-                                    onChangeText={setSearch}
-                                />
-                            </View>
-
-                        </View>
-                        {/* Filtros }
-                        <View style={styles.filterContainer}>
-                            <TouchableOpacity
-                                style={[styles.filterButton, filter === 'activos' && styles.filterButtonActive]}
-                                onPress={() => handleFilterChange('activos')}
-                            >
-                                <Text style={styles.filterButtonText}>Activos</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.filterButton, filter === 'inactivos' && styles.filterButtonActive]}
-                                onPress={() => handleFilterChange('inactivos')}
-                            >
-                                <Text style={styles.filterButtonText}>Inactivos</Text>
-                            </TouchableOpacity>
-                            {filter !== 'todos' && (
-                                <TouchableOpacity
-                                    style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
-                                    onPress={() => handleFilterChange('todos')}
-                                >
-                                    <Text style={styles.filterButtonText}>Borrar filtros</Text>
-                                    <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </View>
-                    {/* Fin Filtros }
-                    <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
-                        <FlatList
-                            data={productsFiltered}
-                            keyExtractor={(item) => item.id.toString()}
-                            renderItem={renderItem}
-                            contentContainerStyle={styles.list}
-                            numColumns={2}
-                            showsVerticalScrollIndicator={false}
-                        />
-                    </View>
-                </>
-            )}
-        </View> 
-    );*/}
+    
     return (
         <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
             <LinearGradient colors={theme.headerGradient} style={styles.header}>
@@ -569,7 +495,7 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: rh(2),
       textAlign: 'center',
-      color: '#000',
+      color: '#fff',
       height: rh(4),
     },
     header: {

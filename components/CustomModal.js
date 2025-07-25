@@ -2,6 +2,11 @@ import { Video, ResizeMode } from 'expo-av';
 import { useState, useEffect, useRef } from "react";
 import { Modal, View, Text, Button, StyleSheet, TouchableOpacity, Image, ScrollView} from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+    responsiveWidth as rw,
+    responsiveHeight as rh,
+    responsiveFontSize as rf,
+} from "react-native-responsive-dimensions"
 
 const CustomModal = ({ visible, videoUri, onClose }) => {
     const [isVisible, setIsVisible] = useState(visible);
@@ -17,17 +22,15 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
         console.log('tipo de videoUri: ', typeof videoUri);
         console.log('videoUri es válido: ', videoUri && videoUri.length > 0);
         
-        // Reset states when modal opens
         if (visible) {
             setHasError(false);
             setIsLoading(true);
             
-            // Set a timeout to prevent infinite loading
             const timeout = setTimeout(() => {
                 console.log('Timeout reached - GIF too large');
                 setHasError(true);
                 setIsLoading(false);
-            }, 30000); // 30 seconds timeout
+            }, 30000); 
             
             setLoadTimeout(timeout);
         }
@@ -61,23 +64,6 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
         onClose();
     };
 
-    const handleImageLoad = () => {
-        console.log('Tu GIF cargado exitosamente');
-        setIsLoading(false);
-        if (loadTimeout) {
-            clearTimeout(loadTimeout);
-        }
-    };
-
-    const handleImageError = (error) => {
-        console.log('Error cargando tu GIF:', error);
-        setHasError(true);
-        setIsLoading(false);
-        if (loadTimeout) {
-            clearTimeout(loadTimeout);
-        }
-    };
-
     return (
         <Modal
             animationType="fade"
@@ -94,7 +80,7 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.modalText}>¡Sigue las señas para pedir tu orden!</Text><ScrollView>
-                    {/* <Text style={{color: 'red', marginBottom: 10}}>Debug: {videoUri}</Text> */}
+                    {videoUri && videoUri != null ?  ( <>
                     <Video
                         ref={video}
                         style={styles.video}
@@ -122,7 +108,11 @@ const CustomModal = ({ visible, videoUri, onClose }) => {
                                 color="#BACA16"
                             />
                         </TouchableOpacity>
-                    </View>
+                    </View></>) : 
+                <View style={styles.videoOff}>
+                                    <MaterialCommunityIcons name="video-off" size={rw(10)} color="#ccc" />
+                                    <Text style={[styles.noVideoText]}>Video no disponible</Text>
+                                </View>}
                     </ScrollView>
                 </View>
 
@@ -146,7 +136,8 @@ const styles = StyleSheet.create({
         paddingVertical: 30,
         paddingHorizontal: 0,
         backgroundColor: "white",
-        borderRadius: 50,
+        borderTopLeftRadius: 50,
+        borderTopRightRadius: 50,
         alignItems: "center",
         paddingBottom: 40,
     },
@@ -175,6 +166,16 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         alignSelf: 'center',
         backgroundColor: '#f0f0f0', // Para ver el área del GIF
-    }
+    },
+    videoOff: {
+        backgroundColor: "#e4e4e4ff",
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 450,
+        marginTop: 10,
+        borderRadius: 10,
+        aspectRatio: 9/16,
+        alignSelf: 'center',
+        },
 });
 export default CustomModal;

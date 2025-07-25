@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext } from "react"
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert } from "react-native"
-import { eliminarJuego, obtenerTodosLosJuegos } from "../api/learn"
+import { eliminarJuego, juegosActivos, juegosInactivos, obtenerTodosLosJuegos } from "../api/learn"
 import { CartContext } from "../context/CartContext"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
@@ -26,6 +26,7 @@ const AdminLearnScreen = () => {
   const [videoUri, setVideoUri] = useState(null)
   const [search, setSearch] = useState("")
   const [keyBoardVisible, setKeyBoardVisible] = useState()
+  const [filter, setFilter] = useState('todos'); // 'todos', 'activos', 'inactivos'
   const { theme } = useTheme()
 
   useEffect(() => {
@@ -71,14 +72,34 @@ const AdminLearnScreen = () => {
       console.error("Error al obtener los juegos:", error)
     }
   }
+  const handleFilterChange = async (newFilter) => {
+    setFilter(newFilter);
+    try {
+      let response;
+      if (newFilter === 'activas') {
+        response = await juegosActivos();
+      } else if (newFilter === 'inactivas') {
+        response = await juegosInactivos();
+      } else {
+        response = await obtenerTodosLosJuegos();
+      }
+      if (response.data.tipo === "SUCCESS") {
+        setGameItems(response.data.datos);
+      } else if (response.data.tipo === "WARNING") {
+        setGameItems([]);
+      }
+    } catch (error) {
+      console.error("Error al filtrar juegos:", error);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchGames()
+      handleFilterChange(filter)
       return () => {
         // Opcional: limpiar estado
       }
-    }, []),
+    }, [filter]),
   )
 
   const handleToggle = (index) => {
@@ -93,7 +114,7 @@ const AdminLearnScreen = () => {
   const renderItem = ({ item, index }) => (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: theme.cardBackground }]}
-      onPress={() => navigation.navigate("DetallesEdit", { item })}
+      onPress={() => navigation.navigate("#", { item })}
     >
       {item.foto ? (
         <Video
@@ -141,26 +162,51 @@ const AdminLearnScreen = () => {
         </View>
       </LinearGradient>
       <View style={styles.sectionContainer}>
-            <View style={styles.btns}>
-              <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
-                <Ionicons name="search" size={rw(5)} color="#416FDF" style={styles.searchIcon} />
-                <TextInput
-                  style={[styles.searchBar, { color: theme.textColor }]}
-                  placeholder="Buscar juego..."
-                  placeholderTextColor="#999"
-                  value={search}
-                  onChangeText={setSearch}
-                />
-              </View>
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => navigation.navigate("AddGame", { formType: "game", isEdit: false })}
-              >
-                <MaterialCommunityIcons name="plus" size={rw(6)} color="#fff" style={{ marginLeft: 0 }} />
-                <Text style={styles.btnText}>Agregar</Text>
-              </TouchableOpacity>
-            </View>
+        <View style={styles.btns}>
+          <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
+            <Ionicons name="search" size={rw(5)} color="#416FDF" style={styles.searchIcon} />
+            <TextInput
+              style={[styles.searchBar, { color: theme.textColor }]}
+              placeholder="Buscar juego..."
+              placeholderTextColor="#999"
+              value={search}
+              onChangeText={setSearch}
+            />
           </View>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate("AddGame", { formType: "game", isEdit: false })}
+          >
+            <MaterialCommunityIcons name="plus" size={rw(6)} color="#fff" style={{ marginLeft: 0 }} />
+            <Text style={styles.btnText}>Agregar</Text>
+          </TouchableOpacity>
+        </View>
+        {/* Filtros */}
+        <View style={styles.filterContainer}>
+          <TouchableOpacity
+            style={[styles.filterButton, filter === 'activas' && styles.filterButtonActive]}
+            onPress={() => handleFilterChange('activas')}
+          >
+            <Text style={styles.filterButtonText}>Activos</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.filterButton, filter === 'inactivas' && styles.filterButtonActive]}
+            onPress={() => handleFilterChange('inactivas')}
+          >
+            <Text style={styles.filterButtonText}>Inactivos</Text>
+          </TouchableOpacity>
+          {filter !== 'todos' && (
+            <TouchableOpacity
+              style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
+              onPress={() => handleFilterChange('todos')}
+            >
+              <Text style={styles.filterButtonText}>Borrar filtros</Text>
+              <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
 
       {gameItems.length === 0 ? (
         <>
@@ -359,7 +405,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: 4,
   },
   btns: {
     width: "100%",

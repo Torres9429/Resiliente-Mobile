@@ -10,6 +10,7 @@ const defaultCarouselData = [
   { id: 1, image: require("../assets/Rectangle 9.png"), isDefault: true },
   { id: 2, image: require("../assets/waiter1.jpg"), isDefault: true },
   { id: 3, image: require("../assets/Rectangle 8.png"), isDefault: true },
+  { id: 4, image: require("../assets/curso.jpg"), isDefault: true },
 ]
 
 const defaultCardText = `Sigue estos sencillos pasos.

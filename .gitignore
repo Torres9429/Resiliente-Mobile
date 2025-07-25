@@ -36,3 +36,4 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 JWT_SECURITY_IMPROVEMENTS.md
+resiliente-app.zip

@@ -121,7 +121,7 @@ const AdminEmployeesScreen = ({ navigation }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
                 <TouchableOpacity
                     style={styles.button2}
-                    onPress={() => navigation.navigate('EditWaiter', { item })}
+                    onPress={() => navigation.navigate('EditEmployee', { item })}
                 >
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -156,7 +156,7 @@ const AdminEmployeesScreen = ({ navigation }) => {
                                 />
                             </View>
 
-                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddWaiter')}>
+                            <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddEmployee')}>
                                 <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
                                 <Text style={styles.btnText}>Agregar</Text>
                             </TouchableOpacity>

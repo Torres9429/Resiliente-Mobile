@@ -84,7 +84,7 @@ const SelectWaiter = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.title}>Selecciona a tu mesero</Text>
         <Text
-          style={{ fontSize: 16, marginBottom: 20, textAlign: "center", textAlign: "justify", paddingHorizontal: 10 }}
+          style={{ fontSize: 16, marginBottom: 20, textAlign: "center", textAlign: "justify", paddingHorizontal: 10, color: "#fff" }}
         >
           Selecciona el mesero que te atiende y revisa sus características para tener una mejor comunicación.
         </Text>
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-    //color: '#fff'
+    color: '#fff'
   },
   header: {
     flexDirection: "column",
