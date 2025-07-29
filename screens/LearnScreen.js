@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useState, useEffect } from "react"
 import {
   View,
@@ -323,7 +321,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     borderRadius: rw(12.5),
     padding: rw(2),
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
   },
   title: {
     fontSize: rf(3.5),

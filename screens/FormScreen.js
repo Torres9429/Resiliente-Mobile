@@ -1,5 +1,3 @@
-//"use client"
-
 import {
   View,
   Text,
@@ -652,7 +650,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     borderRadius: rw(12.5),
     padding: rw(2),
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
   },
   switchContainer: {
     flexDirection: "row",

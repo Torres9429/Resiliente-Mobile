@@ -70,11 +70,7 @@ const AdminEmployeesScreen = ({ navigation }) => {
     }
 
     const handleToggleDetails = (index) => {
-        if (expandedIndex === index) {
-            setExpandedIndex(null);  //Si ya está expandido, lo colapsamos
-        } else {
-            setExpandedIndex(index);  //Expande el detalle del recurso
-        }
+        navigation.navigate('EmployeeDetails', { item: waiters[index] });
     };
     const filteredWaiters = waiters.filter(waiter =>
         waiter.nombre.toLowerCase().includes(search.toLowerCase())
@@ -105,7 +101,7 @@ const AdminEmployeesScreen = ({ navigation }) => {
     };
 
     const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={styles.card} onPress={() => handleToggleDetails(index)}>
+        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('EmployeeDetails', { waiter: item })}>
             <Image
                 source={
                     item.foto

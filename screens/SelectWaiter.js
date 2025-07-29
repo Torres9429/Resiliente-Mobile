@@ -1,10 +1,9 @@
-"use client"
-
-import { useEffect, useState } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from "react-native"
 import { obtenerTodosLosMeseros } from "../api/waiters"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useFocusEffect } from "@react-navigation/native"
 
 const SelectWaiter = ({ navigation }) => {
   const [waiters, setWaiters] = useState([])
@@ -23,22 +22,26 @@ const SelectWaiter = ({ navigation }) => {
     navigation.navigate("Menu", { waiter })
   }
 
-  useEffect(() => {
-    const fetchWaiters = async () => {
-      try {
-        const response = await obtenerTodosLosMeseros()
-        console.log("Respuesta completa:", response.data)
-        if (response.data.tipo === "SUCCESS") {
-          setWaiters(response.data.datos || [])
-        } else {
-          console.error("Error en la respuesta:", response.data.mensaje)
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchWaiters = async () => {
+        try {
+          AsyncStorage.removeItem("selectedWaiter") // Limpiar el mesero seleccionado al entrar a la pantalla
+          console.log("Limpiando mesero seleccionado en AsyncStorage")
+          const response = await obtenerTodosLosMeseros()
+          console.log("Respuesta completa:", response.data)
+          if (response.data.tipo === "SUCCESS") {
+            setWaiters(response.data.datos || [])
+          } else {
+            console.error("Error en la respuesta:", response.data.mensaje)
+          }
+        } catch (error) {
+          console.error("Error al obtener los meseros:", error)
         }
-      } catch (error) {
-        console.error("Error al obtener los meseros:", error)
       }
-    }
-    fetchWaiters()
-  }, [])
+      fetchWaiters()
+    }, []),
+  )
 
   const handleToggleDetails = (index) => {
     if (expandedIndex === index) {

@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Image, Alert, FlatList } from "react-native"
 import { Video, ResizeMode } from "expo-av"
@@ -293,7 +291,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     borderRadius: rw(12.5),
     padding: rw(2),
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
   },
   title: {
     fontSize: rf(3.2),

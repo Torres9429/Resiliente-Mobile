@@ -1,5 +1,3 @@
-"use client"
-
 import React, { useState, useEffect, useContext } from "react"
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert } from "react-native"
 import { eliminarJuego, juegosActivos, juegosInactivos, obtenerTodosLosJuegos } from "../api/learn"

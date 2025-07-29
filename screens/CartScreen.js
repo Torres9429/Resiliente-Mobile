@@ -1,6 +1,4 @@
-"use client"
-
-import React, { useContext, useState } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import {
   View,
   Text,
@@ -26,6 +24,8 @@ import {
   responsiveHeight as rh,
   responsiveFontSize as rf,
 } from "react-native-responsive-dimensions"
+import { useFocusEffect } from "@react-navigation/native"
+
 
 const { width } = Dimensions.get("window")
 
@@ -47,11 +47,12 @@ const CartScreen = () => {
     setInstructionsModalVisible(true)
   }
   // Cargar información del mesero al montar el componente
-  React.useEffect(() => {
-    loadWaiterInfo()
+useFocusEffect(
+    React.useCallback(() => {    loadWaiterInfo()
     getProductVideos()
     console.log("Carrito actualizado:", cart);
-  }, [])
+  }, [cart]),
+)
 
   const loadWaiterInfo = async () => {
     try {
@@ -115,25 +116,29 @@ const CartScreen = () => {
     addToCart({ ...item, cantidad: 1 })
   }
 
-  const renderVideoCarouselItem = ({ item, index }) => {
-    const videos = getProductVideos()
-    const currentItem = videos[index]
+  // Modificar el renderVideoCarouselItem para centrar mejor los videos
+const renderVideoCarouselItem = ({ item, index }) => {
+  const videos = getProductVideos()
+  const currentItem = videos[index]
 
-    return (
-      <View style={styles.videoCarouselItem}>
-        <Text style={styles.videoItemTitle}>{currentItem.nombre}</Text>
-        <Text style={styles.videoItemQuantity}>Cantidad: {currentItem.cantidad}</Text>
+  return (
+    <View style={styles.videoCarouselItem}>
+      <Text style={styles.videoItemTitle}>{currentItem.nombre}</Text>
+      <Text style={styles.videoItemQuantity}>Cantidad: {currentItem.cantidad}</Text>
+      <View style={styles.videoWrapper}>
         <Video
           source={{ uri: currentItem.video }}
           style={styles.carouselVideo}
           useNativeControls
-          resizeMode={ResizeMode.COVER}
+          resizeMode={ResizeMode.CONTAIN}
           isLooping
           shouldPlay={index === currentVideoIndex}
+          isMuted={true}
         />
       </View>
-    )
-  }
+    </View>
+  )
+}
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
@@ -142,14 +147,14 @@ const CartScreen = () => {
         <View style={styles.actionsRow}>
           <Text style={styles.name}>{item.nombre}</Text>
           <TouchableOpacity style={styles.removeButton} onPress={() => removeFromCart(item.id)}>
-            <Ionicons name="trash" size={24} color="#fff" />
+            <Ionicons name="trash" size={rw(6)} color="#fff" />
           </TouchableOpacity>
           {waiterInfo &&waiterInfo.condicion?.id === 1 ? (
             <TouchableOpacity
               style={styles.button}
               onPress={() => handleModal(item.sena?.video)}
             >
-              <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
+              <MaterialCommunityIcons name="hand-clap" size={rw(6)} color="#fff" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity style={styles.button} onPress={() => handleInstructionsModal(item)}>
@@ -162,11 +167,11 @@ const CartScreen = () => {
           <Text style={styles.price}>${item.precio.toFixed(2)}</Text>
           <View style={styles.counterRow}>
             <TouchableOpacity style={styles.counterButton} onPress={() => decreaseQuantity(item)}>
-              <Ionicons name="remove" size={20} color="#fff" />
+              <Ionicons name="remove" size={rw(5)} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.counterText}>{item.cantidad}</Text>
             <TouchableOpacity style={styles.counterButton} onPress={() => increaseQuantity(item)}>
-              <Ionicons name="add" size={20} color="#fff" />
+              <Ionicons name="add" size={rw(5)} color="#fff" />
             </TouchableOpacity>
           </View>
         </View>
@@ -197,7 +202,7 @@ const CartScreen = () => {
         <View style={styles.signOptionsContainer}>
           <Text style={styles.signOptionsTitle}>Instrucciones en Lengua de Señas</Text>
           <TouchableOpacity style={styles.signOptionButton} onPress={handleShowSignCarousel}>
-            <MaterialCommunityIcons name="play-circle" size={24} color="#fff" />
+            <MaterialCommunityIcons name="play-circle" size={rw(6)} color="#fff" />
             <Text style={styles.signOptionText}>Ver señas de mis productos</Text>
           </TouchableOpacity>
         </View>
@@ -255,7 +260,7 @@ const CartScreen = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Señas de tus productos</Text>
               <TouchableOpacity style={styles.closeModalButton} onPress={() => setSignCarouselVisible(false)}>
-                <MaterialCommunityIcons name="close" size={30} color="#BACA16" />
+                <MaterialCommunityIcons name="close" size={rw(7.5)} color="#BACA16" />
               </TouchableOpacity>
             </View>
 
@@ -303,13 +308,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fcfcfc",
-    padding: 16,
+    padding: rw(4), // Changed to responsive width
   },
   title: {
-    fontSize: 24,
+    fontSize: rf(3), // Changed to responsive font size
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: rh(2), // Changed to responsive height
     color: "#333",
   },
   signOptionsContainer: {
@@ -345,112 +350,112 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   list: {
-    paddingBottom: 16,
+    paddingBottom: rh(2), // Changed to responsive height
   },
   card: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 10,
-    margin: 8,
+    borderRadius: rw(3), // Changed to responsive width
+    padding: rw(2.5), // Changed to responsive width
+    margin: rw(2), // Changed to responsive width
     alignItems: "center",
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowRadius: rh(0.6), // Changed to responsive height
     elevation: 2,
     justifyContent: "space-between",
   },
   infoSection: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: rw(3), // Changed to responsive width
     justifyContent: "center",
-    paddingVertical: 8,
+    paddingVertical: rh(1), // Changed to responsive height
     flexDirection: "column",
   },
   image: {
-    width: 90,
-    height: 90,
-    borderRadius: 8,
-    marginLeft: 8,
+    width: rw(22.5), // Changed to responsive width
+    height: rw(22.5), // Changed to responsive width
+    borderRadius: rw(2), // Changed to responsive width
+    marginLeft: rw(2), // Changed to responsive width
     resizeMode: "cover",
     backgroundColor: "#eee",
   },
   name: {
-    fontSize: 16,
+    fontSize: rf(2), // Changed to responsive font size
     fontWeight: "bold",
     color: "#333",
     width: "50%",
   },
   price: {
-    fontSize: 18,
+    fontSize: rf(2.2), // Changed to responsive font size
     fontWeight: "bold",
-    marginVertical: 4,
+    marginVertical: rh(0.5), // Changed to responsive height
   },
   category: {
-    fontSize: 16,
+    fontSize: rf(2), // Changed to responsive font size
     color: "#777",
-    marginBottom: 4,
+    marginBottom: rh(0.5), // Changed to responsive height
   },
   counterRowPrice: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 6,
+    marginVertical: rh(0.8), // Changed to responsive height
   },
   counterRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 6,
+    marginVertical: rh(0.8), // Changed to responsive height
     justifyContent: "flex-end",
     flex: 1,
   },
   counterButton: {
     backgroundColor: "#BACA16",
-    borderRadius: 20,
-    padding: 4,
-    marginHorizontal: 4.5,
+    borderRadius: rw(5), // Changed to responsive width
+    padding: rw(1), // Changed to responsive width
+    marginHorizontal: rw(1.1), // Changed to responsive width
   },
   counterText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    minWidth: 32,
+    fontSize: rf(2.2), // Changed to responsive font size
+    minWidth: rw(8), // Changed to responsive width
     textAlign: "center",
+    fontWeight: "500",
     color: "#333",
   },
   actionsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 6,
+    marginTop: rh(0.8), // Changed to responsive height
   },
   removeButton: {
     backgroundColor: "#f6c80d",
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderRadius: 50,
-    marginRight: 10,
+    paddingVertical: rh(0.8), // Changed to responsive height
+    paddingHorizontal: rw(1.5), // Changed to responsive width
+    borderRadius: rw(12.5), // Changed to responsive width
+    marginRight: rw(2.5), // Changed to responsive width
   },
   button: {
     backgroundColor: "#597cff",
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    borderRadius: 50,
+    paddingVertical: rh(0.8), // Changed to responsive height
+    paddingHorizontal: rw(1.5), // Changed to responsive width
+    borderRadius: rw(12.5), // Changed to responsive width
   },
   totalContainer: {
-    paddingTop: 12,
+    paddingTop: rh(1.5), // Changed to responsive height
     borderTopWidth: 1,
     borderColor: "#ddd",
   },
   totalText: {
-    fontSize: 18,
+    fontSize: rf(2.2), // Changed to responsive font size
     fontWeight: "bold",
     textAlign: "right",
     color: "#333",
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: rf(2), // Changed to responsive font size
     color: "#666",
     textAlign: "center",
-    marginTop: 32,
+    marginTop: rh(4), // Changed to responsive height
   },
   modalOverlay: {
     flex: 1,
@@ -460,19 +465,18 @@ const styles = StyleSheet.create({
   },
   signCarouselModal: {
     backgroundColor: "white",
-    borderRadius: rw(5),
     padding: rw(5),
     maxHeight: '95%',
     minHeight: '80%',
     bottom: 0,
     position: "absolute",
-    paddingVertical: 30,
-    paddingHorizontal: 30,
+    paddingVertical: rh(3), 
+    paddingHorizontal: rw(0), 
     backgroundColor: "white",
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
+    borderTopLeftRadius: rw(12.5), 
+    borderTopRightRadius: rw(12.5), 
     alignItems: "center",
-    paddingBottom: 40,
+    paddingBottom: rh(4), 
   },
   modalHeader: {
     flexDirection: "row",
@@ -503,9 +507,10 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   videoCarouselItem: {
-    width: width - rw(20),
+    width: width,
     alignItems: "center",
-    paddingHorizontal: rw(2),
+    justifyContent: "center",
+    //paddingHorizontal: 20,
   },
   videoItemTitle: {
     fontSize: rf(2.2),
@@ -522,8 +527,7 @@ const styles = StyleSheet.create({
   },
   carouselVideo: {
     width: "100%",
-    height: rh(50),
-    aspectRatio: 9 / 16,
+    height: "100%",
     borderRadius: rw(3),
   },
   paginationContainer: {
@@ -538,10 +542,18 @@ const styles = StyleSheet.create({
     borderRadius: rw(1.25),
     backgroundColor: "#ddd",
     marginHorizontal: rw(1),
+    transition: "all 0.3s ease",
   },
   paginationDotActive: {
     backgroundColor: "#BACA16",
     width: rw(6),
     borderRadius: rw(3),
+  },
+  videoWrapper: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    aspectRatio: 9/16,
+    maxHeight: rh(50),
   },
 })

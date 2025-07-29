@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 5,
     //backgroundColor: "rgba(187, 202, 22, 0.35)", // semi-transparente
-    backgroundColor: "rgba(255, 255, 255, 0.55)",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
 },
   errorText: {
     color: "red",

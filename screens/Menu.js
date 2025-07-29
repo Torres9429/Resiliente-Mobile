@@ -136,7 +136,7 @@ const Menu = () => {
       }
 
     const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('Detalles', { item })}>
+        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)}*/ onPress={() => navigation.navigate('ProductDetails', { item })}>
             <Image
                 source={
                     item.foto ? { uri: item.foto } : require('../assets/default-food.png')
@@ -179,8 +179,10 @@ const Menu = () => {
         <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
             <LinearGradient colors={theme.headerGradient} style={styles.header}>
                 <View style={styles.headerContent}>
-                    <Text style={styles.title}>Menú</Text>
-
+                  <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <MaterialCommunityIcons name="chevron-left" size={40} color="#baca16" />
+                  </TouchableOpacity>
+                  <Text style={styles.title}>Menú</Text>
                 </View>
             </LinearGradient>
 
@@ -512,6 +514,15 @@ const styles = StyleSheet.create({
       flexDirection: 'column',
       marginTop: 0,
     },
+    backButton: {
+      position: "absolute",
+      top: -rh(1.5),
+      left: rw(5),
+      zIndex: 1,
+      borderRadius: rw(12.5),
+      padding: rw(2),
+      backgroundColor: "rgba(255, 255, 255, 0.6)",
+    },
     sectionContainer: {
       width: '100%',
       zIndex: 1,
@@ -527,7 +538,7 @@ const styles = StyleSheet.create({
       backgroundColor: "#fcfcfc",
       borderTopLeftRadius: rw(6),
       borderTopRightRadius: rw(6),
-      marginTop: -rh(6),
+      marginTop: -rh(5),
       paddingTop: rh(8),
     },
     list: {
@@ -636,7 +647,7 @@ const styles = StyleSheet.create({
       width: '90%',
       justifyContent: 'flex-start',
       flexDirection: 'row',
-      marginTop: rh(11),
+      marginTop: rh(12),
       position: 'absolute',
       zIndex: 1,
       alignSelf: 'center',
@@ -678,7 +689,7 @@ const styles = StyleSheet.create({
       justifyContent: 'flex-start',
       marginVertical: rh(1),
       paddingHorizontal: rw(2),
-      top: rh(16),
+      top: rh(17),
       left: rw(2),
       right: 0,
     },

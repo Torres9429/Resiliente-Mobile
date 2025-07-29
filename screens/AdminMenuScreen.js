@@ -14,9 +14,11 @@ import CustomModal from "../components/CustomModal"
 import { useNavigation } from "@react-navigation/native"
 import { LinearGradient } from "expo-linear-gradient"
 import { useTheme } from "../context/ThemeContext"
+import { AuthContext } from "../context/AuthContext"
 
 const AdminMenuScreen = () => {
   const navigation = useNavigation()
+  const { user } = useContext(AuthContext)
   const [menuItems, setMenuItems] = useState([])
   const [expandedIndex, setExpandedIndex] = useState(null)
   const { addToCart } = useContext(CartContext)
@@ -74,6 +76,18 @@ const AdminMenuScreen = () => {
     }
   }
 
+  const handleProductPress = (product) => {
+    console.log("Producto seleccionado:", product, " Role de usuario:", user);
+    
+    if (user === "ADMIN") {
+      navigation.navigate("AdminProductDetails", { product })
+    } else if (user === "EMPLEADO") {
+      navigation.navigate("AdminProductDetails", { product })
+    } else {
+      navigation.navigate("ProductDetails", { product })
+    }
+  }
+
   useFocusEffect(
     React.useCallback(() => {
       const fetchMenu = async () => {
@@ -107,7 +121,7 @@ const AdminMenuScreen = () => {
 
   const renderItem = ({ item, index }) => (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor: theme.cardBackground }]}
+      style={[styles.card, { backgroundColor: theme.cardBackground }]} onPress={() => handleProductPress(item)}
     >
       <Image source={item.foto ? { uri: item.foto } : require("../assets/default-food.png")} style={styles.image} />
       <Text style={[styles.name, { color: theme.textColor }]}>{item.nombre}</Text>
@@ -139,6 +153,9 @@ const AdminMenuScreen = () => {
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <LinearGradient colors={theme.headerGradient} style={styles.header}>
         <View style={styles.headerContent}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <MaterialCommunityIcons name="chevron-left" size={40} color="#baca16" />
+          </TouchableOpacity>
           <Text style={styles.title}>Menú</Text>
         </View>
       </LinearGradient>
@@ -217,238 +234,6 @@ const AdminMenuScreen = () => {
 
 export default AdminMenuScreen
 
-/* const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fcfcfc',
-
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 16,
-        textAlign: 'center',
-        color: '#000',
-        height: 30,
-    },
-    header: {
-        flexDirection: "column",
-        alignItems: "center",
-        width: "100%",
-        justifyContent: 'flex-start',
-        height: '20%',
-        paddingTop: 50,
-        paddingHorizontal: 10,
-        //experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
-        //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
-    },
-    headerContent: {
-        width: '100%',
-        //justifyContent: 'space-between',
-        flexDirection: 'column',
-        marginTop: 0,
-    },
-    sectionContainer: {
-        width: '100%',
-        zIndex: 1,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-    },
-    bodyContainer: {
-        width: '100%',
-        flex: 1,
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        backgroundColor: "#fcfcfc",
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
-        marginTop: -45,
-        paddingTop: 80,
-    },
-    list: {
-        paddingBottom: 10,
-    },
-    card: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 10,
-        margin: 8,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 3,
-        alignContent: 'flex-start',
-        alignItems: 'flex-start',
-        maxWidth: '45%',
-
-    },
-    image: {
-        width: '100%',
-        height: 100,
-        borderRadius: 8,
-        marginBottom: 8,
-        aspectRatio: 1.5,
-        alignSelf: 'center',
-        //resizeMode: 'center',
-    },
-    name: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        textAlign: 'left',
-    },
-    category: {
-        fontSize: 12,
-        color: '#777',
-        marginBottom: 4,
-    },
-    price: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#BACA16',
-        marginBottom: 8,
-    },
-    description: {
-        fontSize: 12,
-        color: '#555',
-        marginTop: 8,
-        textAlign: 'center',
-    },
-    button: {
-        backgroundColor: '#BACA16',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    button2: {
-        backgroundColor: '#f6c80d',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    button3: {
-        backgroundColor: '#597cff',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    detailsContainer: {
-        alignItems: 'center',
-    },
-    gif: {
-        width: 80,
-        height: 80,
-        marginTop: 10,
-    },
-    video: {
-        width: 150,
-        height: 200,
-        marginTop: 10,
-        borderRadius: 10,
-    },
-    buttons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginTop: 10,
-    },
-    addButton: {
-        flexDirection: 'row',
-        height: 40,
-        width: '30%',
-        backgroundColor: '#BACA16',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 10,
-        paddingHorizontal: 15,
-    },
-    btns: {
-        height: 40,
-        width: '90%',
-        justifyContent: 'flex-start',
-        flexDirection: 'row',
-        marginTop: 90,
-        position: 'absolute',
-        zIndex: 1,
-        alignSelf: 'center',
-    },
-    btnText: {
-        textAlign: 'center',
-        fontSize: 18,
-        color: '#fff',
-        marginHorizontal: 5
-    },
-    searchBarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
-        flex: 1,
-        minHeight: 40,
-        maxHeight: 45,
-        marginRight: 10,
-        marginBottom: 35,
-
-    },
-    searchIcon: {
-        marginRight: 10,
-    },
-    searchBar: {
-        flex: 1,
-        fontSize: 16,
-        color: '#333',
-    },
-    // --- Filtros ---
-    filterContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        marginVertical: 10,
-        paddingHorizontal: 5,
-        //zIndex: 1,
-        top: 130,
-        left: 10,
-        right: 0,
-    },
-    filterButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        backgroundColor: '#fcedb1', // Color de fondo amarillo claro
-        //backgroundColor: 'rgba(246, 199, 13, 0.2)', //amarillo transparente F6C80D
-        borderColor: 'rgba(187, 202, 22, 0.48)',//'#BACA16' transparente,
-        borderWidth: 1,
-        borderRadius: 20,
-        marginHorizontal: 5,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    filterButtonActive: {
-        backgroundColor: '#BACA16',
-    },
-    filterButtonText: {
-        color: '#333',
-        fontWeight: 'bold',
-    },
-}); */
 const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -460,7 +245,7 @@ const styles = StyleSheet.create({
       marginBottom: rh(2),
       textAlign: 'center',
       color: '#fff',
-      height: rh(4),
+      height: rh(5),
     },
     header: {
       flexDirection: "column",
@@ -468,13 +253,22 @@ const styles = StyleSheet.create({
       width: "100%",
       justifyContent: 'flex-start',
       height: rh(20),
-      paddingTop: rh(6),
+      paddingTop: rh(7),
       paddingHorizontal: rw(3),
     },
     headerContent: {
       width: '100%',
       flexDirection: 'column',
       marginTop: 0,
+    },
+    backButton: {
+      position: "absolute",
+      top: -rh(2),
+      left: rw(5),
+      zIndex: 1,
+      borderRadius: rw(12.5),
+      padding: rw(2),
+      backgroundColor: "rgba(255, 255, 255, 0.6)",
     },
     sectionContainer: {
       width: '100%',
@@ -491,7 +285,7 @@ const styles = StyleSheet.create({
       backgroundColor: "#fcfcfc",
       borderTopLeftRadius: rw(6),
       borderTopRightRadius: rw(6),
-      marginTop: -rh(6),
+      marginTop: -rh(5),
       paddingTop: rh(8),
     },
     list: {
@@ -607,7 +401,7 @@ const styles = StyleSheet.create({
       width: '90%',
       justifyContent: 'flex-start',
       flexDirection: 'row',
-      marginTop: rh(11),
+      marginTop: rh(12),
       position: 'absolute',
       zIndex: 1,
       alignSelf: 'center',
@@ -649,7 +443,7 @@ const styles = StyleSheet.create({
       justifyContent: 'flex-start',
       marginVertical: rh(1),
       paddingHorizontal: rw(2),
-      top: rh(16),
+      top: rh(17),
       left: rw(2),
       right: 0,
     },

@@ -1,5 +1,3 @@
-"use client"
-
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native"
 import { useContext, useState } from "react"
 import { AuthContext } from "../context/AuthContext"
@@ -136,8 +134,8 @@ const styles = StyleSheet.create({
   },
   foto: {
     width: "100%",
-    height: "100%",
-    aspectRatio: 1,
+    height: "90%",
+    //aspectRatio: 6/12,
   },
   backButton: {
     position: "absolute",
@@ -146,7 +144,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     borderRadius: rw(12.5),
     padding: rw(2),
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
   },
   detallesContainer: {
     flex: 1,
