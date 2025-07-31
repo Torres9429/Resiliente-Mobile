@@ -10,6 +10,7 @@ import {
   Image,
   Alert,
   Animated,
+  Platform,
 } from "react-native"
 import { Video } from "expo-av"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
@@ -118,7 +119,7 @@ const LearnScreen = () => {
       <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#fff" />
+            <MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#baca16" />
           </TouchableOpacity>
           <Text style={styles.title}>Aprende Señas</Text>
         </View>
@@ -137,7 +138,7 @@ const LearnScreen = () => {
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#fff" />
+          <MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#BACA16" />
         </TouchableOpacity>
         <Text style={styles.title}>Aprende LSM</Text>
         <Text style={styles.subtitle}>Toca las tarjetas para ver las señas</Text>
@@ -316,8 +317,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: rh(6),
-    left: rw(5),
+    top: Platform.OS === 'ios' ? rh(4.5) : rh(3.5),
+    left: rw(8),
     zIndex: 1,
     borderRadius: rw(12.5),
     padding: rw(2),
@@ -327,7 +328,7 @@ const styles = StyleSheet.create({
     fontSize: rf(3.5),
     fontWeight: "bold",
     color: "#fff",
-    marginTop: rh(2),
+    marginTop: Platform.OS === 'ios' ? rh(0) : -rh(1.5),
   },
   subtitle: {
     fontSize: rf(2),

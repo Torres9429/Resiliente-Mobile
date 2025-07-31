@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react"
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert } from "react-native"
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert, Platform } from "react-native"
 import { eliminarJuego, juegosActivos, juegosInactivos, obtenerTodosLosJuegos } from "../api/learn"
 import { CartContext } from "../context/CartContext"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
@@ -272,6 +272,7 @@ const styles = StyleSheet.create({
     marginBottom: rh(2),
     textAlign: "center",
     color: "#fff",
+    height: rh(5),
   },
   header: {
     flexDirection: "column",
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "flex-start",
     height: rh(20),
-    paddingTop: rh(6),
+    paddingTop: Platform.OS === "ios" ? rh(6) : rh(5),
     paddingHorizontal: rw(3),
   },
   headerContent: {
@@ -407,6 +408,7 @@ const styles = StyleSheet.create({
   },
   btns: {
     width: "100%",
+    height: rh(5),
     justifyContent: "space-around",
     flexDirection: "row",
     marginTop: rh(11),
@@ -427,7 +429,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: rw(3),
     paddingHorizontal: rw(4),
-    paddingVertical: rh(0.6),
+    paddingVertical: Platform.OS === 'android' ? rh(0) : rh(0.6),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -474,7 +476,7 @@ const styles = StyleSheet.create({
   filterButtonText: {
     color: '#333',
     fontWeight: 'bold',
-    fontSize: rf(1.8),
+    fontSize: Platform.OS === 'ios' ? rf(1.8) : rf(1.5),
   },
   emptyContainer: {
     flex: 1,

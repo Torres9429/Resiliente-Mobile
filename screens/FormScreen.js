@@ -28,6 +28,7 @@ import { obtenerTodasLasSenas } from "../api/sign"
 import { obtenerTodasLasCondiciones } from "../api/disability"
 import { ResizeMode, Video } from "expo-av"
 import { useTheme } from "../context/ThemeContext"
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   responsiveWidth as rw,
   responsiveHeight as rh,
@@ -488,7 +489,7 @@ const FormScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-      <View style={styles.header}>
+      <LinearGradient colors={theme.headerGradient} style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#BACA16" />
         </TouchableOpacity>
@@ -497,7 +498,7 @@ const FormScreen = () => {
           {isEdit ? "Modifica" : "Completa"} los campos para {isEdit ? "actualizar" : "agregar"}{" "}
           {getItemTypeName().toLowerCase()}.
         </Text>
-      </View>
+      </LinearGradient>
 
       <View style={[styles.bodyContainer, { backgroundColor: theme.cardBackground }]}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -572,7 +573,8 @@ const styles = StyleSheet.create({
   bodyContainer: {
     width: "100%",
     flex: 1,
-    padding: rw(5),
+    paddingHorizontal: rw(5),
+    paddingTop: rh(3),
     backgroundColor: "#fff",
     borderTopLeftRadius: rw(6),
     borderTopRightRadius: rw(6),

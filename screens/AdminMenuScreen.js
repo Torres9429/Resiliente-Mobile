@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react"
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert } from "react-native"
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, TextInput, Keyboard, Alert, Platform } from "react-native"
 import {
   responsiveWidth as rw,
   responsiveHeight as rh,
@@ -153,9 +153,6 @@ const AdminMenuScreen = () => {
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <LinearGradient colors={theme.headerGradient} style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <MaterialCommunityIcons name="chevron-left" size={40} color="#baca16" />
-          </TouchableOpacity>
           <Text style={styles.title}>Menú</Text>
         </View>
       </LinearGradient>
@@ -253,7 +250,7 @@ const styles = StyleSheet.create({
       width: "100%",
       justifyContent: 'flex-start',
       height: rh(20),
-      paddingTop: rh(7),
+      paddingTop: Platform.OS === "ios" ? rh(6) : rh(5),
       paddingHorizontal: rw(3),
     },
     headerContent: {
@@ -285,8 +282,8 @@ const styles = StyleSheet.create({
       backgroundColor: "#fcfcfc",
       borderTopLeftRadius: rw(6),
       borderTopRightRadius: rw(6),
-      marginTop: -rh(5),
-      paddingTop: rh(8),
+      marginTop: -rh(6),
+      paddingTop: Platform.OS === 'ios' ? rh(8) : rh(8.5),
     },
     list: {
       paddingBottom: rh(1),
@@ -401,7 +398,7 @@ const styles = StyleSheet.create({
       width: '90%',
       justifyContent: 'flex-start',
       flexDirection: 'row',
-      marginTop: rh(12),
+      marginTop: rh(11),
       position: 'absolute',
       zIndex: 1,
       alignSelf: 'center',
@@ -418,7 +415,7 @@ const styles = StyleSheet.create({
       backgroundColor: 'white',
       borderRadius: rw(3),
       paddingHorizontal: rw(4),
-      paddingVertical: rh(0.6),
+      paddingVertical: Platform.OS === 'android' ? rh(0) : rh(0.6),
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
@@ -443,7 +440,7 @@ const styles = StyleSheet.create({
       justifyContent: 'flex-start',
       marginVertical: rh(1),
       paddingHorizontal: rw(2),
-      top: rh(17),
+      top: rh(16),
       left: rw(2),
       right: 0,
     },
@@ -465,6 +462,6 @@ const styles = StyleSheet.create({
     filterButtonText: {
       color: '#333',
       fontWeight: 'bold',
-      fontSize: rf(1.8),
+      fontSize: Platform.OS === 'ios' ? rf(1.8) : rf(1.5),
     },
   }); 

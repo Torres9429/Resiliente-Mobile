@@ -33,7 +33,7 @@ const AdminProductDetailsScreen = () => {
     }
 
     const handleEdit = () => {
-        navigation.navigate("EditProduct", { product })
+        navigation.navigate("EditProduct", { item: product })
     }
 
     const handleDelete = () => {

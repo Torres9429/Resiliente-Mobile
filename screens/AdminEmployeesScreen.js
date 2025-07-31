@@ -8,7 +8,7 @@ import {
     StyleSheet,
     SafeAreaView,
     TextInput,
-    Alert
+    Alert, Platform
 } from 'react-native';
 import {
     responsiveWidth as rw,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: 'flex-start',
     height: rh(20),
-    paddingTop: rh(6),
+    paddingTop: Platform.OS === "ios" ? rh(6) : rh(5),
     paddingHorizontal: rw(3),
     },
     headerContent: {
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: rw(6),
     borderTopRightRadius: rw(6),
     marginTop: -rh(6),
-    paddingTop: rh(8),
+      paddingTop: Platform.OS === 'ios' ? rh(8) : rh(8.5),
     },
     list: {
     paddingBottom: rh(1),
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: rw(3),
         paddingHorizontal: rw(4),
-        paddingVertical: rh(0.6),
+      paddingVertical: Platform.OS === 'android' ? rh(0) : rh(0.6),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
@@ -438,6 +438,6 @@ const styles = StyleSheet.create({
       filterButtonText: {
         color: '#333',
         fontWeight: 'bold',
-        fontSize: rf(1.8),
+        fontSize: Platform.OS === 'ios' ? rf(1.8) : rf(1.5),
       },
 });

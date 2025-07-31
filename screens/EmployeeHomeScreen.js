@@ -184,7 +184,7 @@ const EmployeeHomeScreen = () => {
             <View style={styles.sectionHeader}>
               <MaterialCommunityIcons name="eye-outline" size={24} color={theme.primaryColor} />
               <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Vista Rápida del Menú</Text>
-              <TouchableOpacity style={styles.viewAllButton} onPress={() => navigation.navigate("MenuList")}>
+              <TouchableOpacity style={styles.viewAllButton} onPress={() => navigation.navigate("Menu")}>
                 <Text style={styles.viewAllText}>Ver todo</Text>
                 <MaterialCommunityIcons name="arrow-right" size={16} color={theme.primaryColor} />
               </TouchableOpacity>

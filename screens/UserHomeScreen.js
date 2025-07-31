@@ -9,6 +9,7 @@ import {
   Image,
   Modal,
   ScrollView,
+  Platform,
 } from "react-native"
 import Carousel from "react-native-reanimated-carousel"
 import { Video, ResizeMode } from "expo-av"
@@ -217,6 +218,7 @@ const styles = StyleSheet.create({
     marginBottom: rh(3),
     textAlign: "center",
     paddingHorizontal: rw(5),
+    marginTop: Platform.OS === 'ios' ? 0 : rh(2),
   },
   carouselSection: {
     width: "100%",

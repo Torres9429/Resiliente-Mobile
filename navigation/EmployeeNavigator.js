@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { useContext } from "react"
-import { View, StyleSheet } from "react-native"
+import { View, StyleSheet, Platform } from "react-native"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
 
 import { AuthContext } from "../context/AuthContext"
@@ -47,7 +47,7 @@ const EmployeeNavigator = () => {
           marginTop: 0,
           elevation: 0,
           backgroundColor: theme.cardBackground,
-          height: 80,
+          height: Platform.OS === "ios" ? 80 : 95,
           ...styles.shadow,
         },
         tabBarItemStyle: {

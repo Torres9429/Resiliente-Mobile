@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react"
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from "react-native"
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, Platform } from "react-native"
 import { obtenerTodosLosMeseros } from "../api/waiters"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -126,11 +126,9 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "flex-start",
     height: "25%",
-    paddingTop: 50,
+    paddingTop: Platform.OS === "ios" ? 50 : 30,
     paddingHorizontal: 10,
     experimental_backgroundImage: "linear-gradient(180deg, #51BBF5 0%, #559BFA 70%,rgb(67, 128, 213) 100%)",
-    //experimental_backgroundImage: "linear-gradient(180deg, #f6c80d 0%, #baca16 40%,rgb(117, 128, 4) 100%)",
-    //backgroundColor: '#BACA16',
     color: "#fff",
   },
   waitersContainer: {
