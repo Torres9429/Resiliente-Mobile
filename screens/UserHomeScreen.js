@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext, useRef, useState } from "react"
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
   responsiveHeight as rh,
   responsiveFontSize as rf,
 } from "react-native-responsive-dimensions"
+import CustomModal from "../components/CustomModal"
 
 const { width } = Dimensions.get("window")
 
@@ -31,6 +32,9 @@ const UserHomeScreen = () => {
   const navigation = useNavigation()
   const [videoModalVisible, setVideoModalVisible] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [status, setStatus] = useState({});
+  const video = useRef(null);
 
   const isAdmin = user === "ADMIN"
 
@@ -150,18 +154,50 @@ const UserHomeScreen = () => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <TouchableOpacity style={styles.closeButton} onPress={() => setVideoModalVisible(false)}>
-                <MaterialCommunityIcons name="close" size={40} color="#BACA16" />
-              </TouchableOpacity>
-              {lsmVideo && (
-                <Video
-                  source={{ uri: lsmVideo }}
-                  style={styles.modalVideo}
-                  useNativeControls
-                  resizeMode={ResizeMode.COVER}
-                  isLooping
-                  shouldPlay={true}
-                />
+
+              <View style={{ position: "absolute", top: 10, right: 30 }}>
+                <TouchableOpacity style={styles.closeButton} onPress={() => setVideoModalVisible(false)}>
+                  <MaterialCommunityIcons name="close" size={40} color="#BACA16" />
+                </TouchableOpacity>
+              </View>
+              {lsmVideo && lsmVideo != null ? (
+                <>
+                  <Video
+                    ref={video}
+                    style={styles.video}
+                    source={{
+                      uri: lsmVideo,
+                    }}
+                    useNativeControls
+                    resizeMode={ResizeMode.COVER}
+                    isLooping
+                    onPlaybackStatusUpdate={status => setStatus(() => status)}
+                    isMuted={true}
+                  />
+                  <View style={styles.buttons}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (status.isPlaying) {
+                          video.current.pauseAsync();
+                        } else {
+                          video.current.playAsync();
+                        }
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name={status.isPlaying ? 'pause' : 'play'}
+                        size={36}
+                        color="#BACA16"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <View style={styles.videoOff}>
+                  <MaterialCommunityIcons name="video-off" size={rw(10)} color="#ccc" />
+                  <Text style={[styles.noVideoText]}>Video no disponible</Text>
+                </View>
+
               )}
             </View>
           </View>
@@ -371,18 +407,63 @@ const styles = StyleSheet.create({
     maxHeight: "80%",
     alignItems: "center",
   },
-  closeButton: {
-    position: "absolute",
-    top: rh(3),
-    right: rw(7),
-    zIndex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.35)",
-    borderRadius: rw(20),
-  },
   modalVideo: {
     width: "100%",
     height: rh(60),
     borderRadius: rw(3),
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: '100%',
+    maxHeight: '80%',
+    minHeight: '70%',
+    bottom: 0,
+    position: "absolute",
+    paddingVertical: 30,
+    paddingHorizontal: 0,
+    backgroundColor: "white",
+    borderTopLeftRadius: rw(15),
+    borderTopRightRadius: rw(15),
+    alignItems: "center",
+    paddingBottom: 30,
+    padding: rw(5),
+  },
+  video: {
+    height: 450,
+    marginTop: 10,
+    borderRadius: 10,
+    aspectRatio: 9 / 16,
+    alignSelf: 'center',
+  },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+    width: '100%',
+  },
+  gifStyle: {
+    width: 300,
+    height: 400,
+    borderRadius: 8,
+    marginBottom: 8,
+    alignSelf: 'center',
+    backgroundColor: '#f0f0f0', // Para ver el área del GIF
+  },
+  videoOff: {
+    backgroundColor: "#e4e4e4ff",
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 450,
+    marginTop: 10,
+    borderRadius: 10,
+    aspectRatio: 9 / 16,
+    alignSelf: 'center',
   },
 })
 

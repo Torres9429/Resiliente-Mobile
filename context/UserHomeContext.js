@@ -28,7 +28,7 @@ export const UserHomeProvider = ({ children }) => {
   const [carouselData, setCarouselData] = useState(defaultCarouselData)
   const [cardText, setCardText] = useState(defaultCardText)
   const [cardTitle, setCardTitle] = useState("¿Listo para ordenar?")
-  const [lsmVideo, setLsmVideo] = useState(null)
+  const [lsmVideo, setLsmVideo] = useState('https://cdn.proyectoresiliente.org/sena/f261c07d-017a-4763-84cd-b55249a37628.mov')
   const [instructionsText, setInstructionsText] = useState(defaultInstructionsText)
   const [generalInstructionsText, setGeneralInstructionsText] = useState(defaultGeneralInstructionsText)
   const [isLoading, setIsLoading] = useState(false)

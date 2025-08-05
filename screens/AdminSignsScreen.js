@@ -1,211 +1,185 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     View,
     Text,
     FlatList,
-    Image,
     StyleSheet,
     TouchableOpacity,
-    SafeAreaView,
     TextInput,
-    KeyboardAvoidingView,
-    Keyboard,
-    Platform,
-    TouchableWithoutFeedback,
     Alert,
+    Platform,
+    ActivityIndicator 
 } from 'react-native';
 import {
     responsiveWidth as rw,
     responsiveHeight as rh,
     responsiveFontSize as rf,
-} from "react-native-responsive-dimensions"
+} from "react-native-responsive-dimensions";
 import { eliminarSena, obtenerTodasLasSenas, senasActivas, senasInactivas } from '../api/sign';
-import { CartContext } from '../context/CartContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import CustomModal from '../components/CustomModal';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { ResizeMode, Video } from 'expo-av';
 import { useTheme } from '../context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
-
 const AdminSignScreen = () => {
     const navigation = useNavigation();
     const [signItems, setSignItems] = useState([]);
-    const [expandedIndex, setExpandedIndex] = useState(null);
-    const { addToCart } = useContext(CartContext);
     const [modalVisible, setModalVisible] = useState(false);
     const [videoUri, setVideoUri] = useState(null);
     const [search, setSearch] = useState('');
-    const [keyBoardVisible, setKeyBoardVisible] = useState();
     const { theme } = useTheme();
-    const [filter, setFilter] = useState('todos'); // 'todos', 'activos', 'inactivos'
+    const [filter, setFilter] = useState('todos');
 
-    useEffect(() => {
-        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-            setKeyBoardVisible(true);
-        });
+    const [loading, setLoading] = useState(true);
 
-        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyBoardVisible(false);
-        });
-
-        return () => {
-            keyboardDidShowListener.remove();
-            keyboardDidHideListener.remove();
-        };
-    }, []);
-
-    // filtros de búsqueda
     const signsFiltered = signItems.filter(sign =>
         sign.nombre.toLowerCase().includes(search.toLowerCase())
-    )
-
-    const handleDelete = async (id) => {
-        try {
-            await eliminarSena(id);
-            Alert.alert("Éxito", "Seña eliminada correctamente", [
-                { text: "OK" },
-            ]);
-        } catch (error) {
-            console.error("Error al eliminar seña:", error);
-            Alert.alert("Error", "No se pudo eliminar la seña, por favor intente nuevamente.");
-        }
-    }
-
-    useFocusEffect(
-        React.useCallback(() => {
-            const fetchSigns = async () => {
-                try {
-                    const response = await obtenerTodasLasSenas();
-                    if (response.data.tipo === "SUCCESS") {
-                        setSignItems(response.data.datos);
-                        console.log("Respuesta completa:", response.data);
-                    } else {
-                        console.error("Error en la respuesta:", response.data.mensaje);
-                    }
-                } catch (error) {
-                    console.error("Error al obtener los productos:", error);
-                }
-            };
-            fetchSigns();
-            // Probar si la URL es accesible
-            if (videoUri) {
-                fetch(videoUri)
-                    .then(response => {
-                        console.log('Fetch response status admin:', response.status, ' uri: ', videoUri);
-                        console.log('Fetch response headers:', response.headers);
-                    })
-                    .catch(error => {
-                        console.log('Fetch error:', error);
-                    });
-            }
-            return () => {
-                // Opcional: limpiar estado 
-            };
-        }, [])
-
     );
 
-    const handleToggle = (index) => {
-        setExpandedIndex(index === expandedIndex ? null : index);
+    const handleDelete = async (id) => {
+        Alert.alert(
+            "Confirmar Eliminación",
+            "¿Estás seguro de que quieres eliminar esta seña?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Eliminar",
+                    onPress: async () => {
+                        try {
+                            await eliminarSena(id);
+                            Alert.alert("Éxito", "Seña eliminada correctamente");
+                            handleFilterChange(filter); // Recargar lista
+                        } catch (error) {
+                            console.error("Error al eliminar seña:", error);
+                            Alert.alert("Error", "No se pudo eliminar la seña.");
+                        }
+                    },
+                    style: "destructive",
+                },
+            ]
+        );
     };
-    const handleModal = (video) => {
-        setModalVisible(true);
-        console.log("video: ", video);
-        setVideoUri(video);
-    }
-    const handleEdit = (item) => {
-        console.log('nav: ', item);
 
-        navigation.navigate('EditSign', { isEdit: true, item: item });
-    }
+    // --- CAMBIO CLAVE 3: Ajustar filtros con el estado de carga ---
     const handleFilterChange = async (newFilter) => {
         setFilter(newFilter);
+        setLoading(true);
         try {
             let response;
-            if (newFilter === 'activas') {
+            if (newFilter === 'activos') {
                 response = await senasActivas();
-            } else if (newFilter === 'inactivas') {
+            } else if (newFilter === 'inactivos') {
                 response = await senasInactivas();
             } else {
                 response = await obtenerTodasLasSenas();
             }
             if (response.data.tipo === "SUCCESS") {
-                setSignItems(response.data.datos);
-            } else if (response.data.tipo === "WARNING") {
+                setSignItems(response.data.datos || []);
+            } else {
                 setSignItems([]);
             }
         } catch (error) {
-            console.error("Error al filtrar meseros:", error);
+            console.error("Error al filtrar señas:", error);
+            setSignItems([]);
+            Alert.alert("Error", "No se pudieron cargar las señas.");
+        } finally {
+            setLoading(false);
         }
     };
 
+    useFocusEffect(
+        React.useCallback(() => {
+            handleFilterChange(filter);
+        }, [])
+    );
 
-    const renderItem = ({ item, index }) => (
-        <TouchableOpacity style={styles.card} /*onPress={() => handleToggle(index)} onPress={() => navigation.navigate('DetallesEdit', { item })}*/>
+    const handleModal = (video) => {
+        setModalVisible(true);
+        setVideoUri(video);
+    };
 
-            {item.video && item.video !== "" ? (
+    const handleEdit = (item) => {
+        navigation.navigate('EditSign', { isEdit: true, item: item });
+    };
+
+    const renderItem = ({ item }) => (
+        <View style={styles.card}>
+            {item.video ? (
                 <Video
                     source={{ uri: item.video }}
                     style={styles.video}
                     resizeMode={ResizeMode.COVER}
-                    isLooping
                     useNativeControls
-                    onLoad={() => console.log('Video cargado exitosamente')}
-                    onError={(error) => console.log('Error cargando video:', error?.nativeEvent)}
                 />
             ) : (
                 <View style={styles.videoOff}>
                     <MaterialCommunityIcons name="video-off" size={rw(10)} color="#ccc" />
-                    <Text style={[styles.noVideoText, { color: theme.textColor }]}>Video no disponible</Text>
                 </View>
             )}
 
-            <Text style={styles.name}>{item.nombre}</Text>
+            <Text style={styles.name} numberOfLines={2}>{item.nombre}</Text>
 
-            {expandedIndex === index && (
-                <View style={styles.detailsContainer}>
-                    <Text style={styles.description}>{item.descripcion}</Text>
-
-                </View>
-            )}
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 1 }}>
-                <TouchableOpacity
-                    style={styles.button2}
-                    onPress={() => handleEdit(item)}
-                >
+            <View style={styles.buttonRow}>
+                <TouchableOpacity style={styles.button2} onPress={() => handleEdit(item)}>
                     <MaterialCommunityIcons name="pencil" size={24} color="#fff" />
                 </TouchableOpacity>
-                {/* <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => handleModal(item.video)}
-                >
-                    <MaterialCommunityIcons name="hand-clap" size={24} color="#fff" />
-                </TouchableOpacity> */}
                 <TouchableOpacity style={styles.button3} onPress={() => handleDelete(item.id)}>
                     <Ionicons name="trash" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
-        </TouchableOpacity>
+        </View>
     );
 
+    // --- CAMBIO CLAVE 5: Crear un renderizador para el cuerpo ---
+    const renderBody = () => {
+        if (loading) {
+            return (
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color="#BACA16" />
+                    <Text style={{ marginTop: 10, color: theme.textColor }}>Cargando señas...</Text>
+                </View>
+            );
+        }
+
+        if (signsFiltered.length === 0) {
+            return (
+                <View style={styles.emptyContainer}>
+                    <MaterialCommunityIcons name="hand-clap" size={rw(20)} color="#BACA16" />
+                    <Text style={[styles.emptyText, { color: theme.textColor }]}>
+                        {search ? 'No se encontraron resultados' : 'No hay señas disponibles'}
+                    </Text>
+                </View>
+            );
+        }
+
+        return (
+            <FlatList
+                data={signsFiltered}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={renderItem}
+                contentContainerStyle={styles.list}
+                numColumns={2}
+                showsVerticalScrollIndicator={false}
+            />
+        );
+    };
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
             <LinearGradient colors={theme.headerGradient} style={styles.header}>
                 <View style={styles.headerContent}>
                     <Text style={styles.title}>Señas</Text>
                 </View>
             </LinearGradient>
+
             <View style={styles.sectionContainer}>
                 <View style={styles.btns}>
-                    <View style={styles.searchBarContainer}>
+                    <View style={[styles.searchBarContainer, { backgroundColor: theme.cardBackground }]}>
                         <Ionicons name="search" size={20} color="#416FDF" style={styles.searchIcon} />
                         <TextInput
-                            style={styles.searchBar}
+                            style={[styles.searchBar, { color: theme.textColor }]}
                             placeholder="Buscar seña..."
                             placeholderTextColor="#999"
                             value={search}
@@ -213,59 +187,44 @@ const AdminSignScreen = () => {
                         />
                     </View>
                     <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddSign')}>
-                        <MaterialCommunityIcons name='plus' size={24} color="#fff" style={{ marginLeft: 0 }} />
+                        <MaterialCommunityIcons name='plus' size={24} color="#fff" />
                         <Text style={styles.btnText}>Agregar</Text>
                     </TouchableOpacity>
                 </View>
+
                 {/* Filtros */}
                 <View style={styles.filterContainer}>
                     <TouchableOpacity
-                        style={[styles.filterButton, filter === 'activas' && styles.filterButtonActive]}
-                        onPress={() => handleFilterChange('activas')}
+                        style={[styles.filterButton, filter === 'activos' && styles.filterButtonActive]}
+                        onPress={() => handleFilterChange('activos')}
+                        disabled={loading}
                     >
-                        <Text style={styles.filterButtonText}>Activos</Text>
+                        <Text style={styles.filterButtonText}>Activas</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={[styles.filterButton, filter === 'inactivas' && styles.filterButtonActive]}
-                        onPress={() => handleFilterChange('inactivas')}
+                        style={[styles.filterButton, filter === 'inactivos' && styles.filterButtonActive]}
+                        onPress={() => handleFilterChange('inactivos')}
+                        disabled={loading}
                     >
-                        <Text style={styles.filterButtonText}>Inactivos</Text>
+                        <Text style={styles.filterButtonText}>Inactivas</Text>
                     </TouchableOpacity>
                     {filter !== 'todos' && (
                         <TouchableOpacity
-                            style={[styles.filterButton, filter === 'todos' && styles.filterButtonActive]}
+                            style={styles.filterButton}
                             onPress={() => handleFilterChange('todos')}
+                            disabled={loading}
                         >
-                            <Text style={styles.filterButtonText}>Borrar filtros</Text>
+                            <Text style={styles.filterButtonText}>Borrar</Text>
                             <MaterialCommunityIcons name='close' size={18} color="#333" style={{ marginLeft: 5 }} />
                         </TouchableOpacity>
                     )}
                 </View>
             </View>
-            {signItems.length === 0 ? (
-                <>
-                    <View style={styles.bodyContainer}>
-                        <Text style={{ textAlign: 'center', marginTop: 20 }}>
-                            No hay productos disponibles
-                        </Text>
-                    </View>
 
-                </>
-            ) : (
-                <>
+            <View style={[styles.bodyContainer, { backgroundColor: theme.backgroundColor }]}>
+                {renderBody()}
+            </View>
 
-                    <View style={styles.bodyContainer}>
-                        <FlatList
-                            data={signsFiltered}
-                            keyExtractor={(item) => item.id.toString()}
-                            renderItem={renderItem}
-                            contentContainerStyle={styles.list}
-                            numColumns={2}
-                            showsVerticalScrollIndicator={false}
-                        />
-                    </View>
-                </>
-            )}
             <CustomModal
                 visible={modalVisible}
                 videoUri={videoUri}
@@ -329,101 +288,51 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         borderRadius: rw(3),
-        padding: rw(2),
-        margin: rw(2),
+        padding: rw(2.5),
+        margin: rw(1.5),
         alignItems: 'flex-start',
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 3,
         maxWidth: rw(45),
+        justifyContent: 'space-between'
     },
-    image: {
-        width: rw(40),
-        height: rh(18),
+    video: {
+        width: '100%',
+        height: rh(25),
         borderRadius: rw(2),
-        marginBottom: rh(1),
-        //aspectRatio: 1.5,
-        alignSelf: 'center',
+        backgroundColor: '#f0f0f0'
+    },
+    videoOff: {
+        width: '100%',
+        height: rh(25),
+        borderRadius: rw(2),
+        backgroundColor: "#f0f0f0",
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     name: {
         fontSize: rf(2),
         fontWeight: 'bold',
         color: '#333',
-        textAlign: 'left',
         marginTop: rh(1),
     },
-    category: {
-        fontSize: 12,
-        color: '#777',
-        marginBottom: 4,
-    },
-    price: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#BACA16',
-        marginBottom: 8,
-    },
-    description: {
-        fontSize: 12,
-        color: '#555',
-        marginTop: 8,
-        textAlign: 'center',
-    },
-    button: {
-        backgroundColor: '#BACA16',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 50,
-        marginTop: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 14,
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+        marginTop: 'auto',
     },
     button2: {
         backgroundColor: '#f6c80d',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
+        padding: rw(2),
         borderRadius: 50,
-        marginTop: 10,
     },
     button3: {
         backgroundColor: '#597cff',
-        paddingVertical: 6,
-        paddingHorizontal: 6,
+        padding: rw(2),
         borderRadius: 50,
-        marginTop: 10,
-    },
-    detailsContainer: {
-        alignItems: 'center',
-    },
-    gif: {
-        width: 80,
-        height: 80,
-        marginTop: 10,
-    },
-    video: {
-        width: rw(40),
-        height: rh(30),
-        marginTop: rh(1),
-        borderRadius: rw(2),
-    },
-    videoOff: {
-        width: rw(40),
-        height: rh(30),
-        marginTop: rh(1),
-        borderRadius: rw(2),
-        backgroundColor: "#f5f5f5",
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    buttons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginTop: rh(1),
     },
     addButton: {
         flexDirection: 'row',
@@ -434,9 +343,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: rw(3),
         paddingHorizontal: rw(3),
-        // Sombra para Android
         elevation: 4,
-        // Sombra para iOS
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -511,6 +418,24 @@ const styles = StyleSheet.create({
     filterButtonText: {
         color: '#333',
         fontWeight: 'bold',
-      fontSize: Platform.OS === 'ios' ? rf(1.8) : rf(1.5),
+        fontSize: Platform.OS === 'ios' ? rf(1.8) : rf(1.5),
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: rw(5),
+    },
+    emptyText: {
+        fontSize: rf(2.5),
+        color: "#666",
+        textAlign: "center",
+        marginTop: rh(2),
+        fontWeight: "600",
     },
 });

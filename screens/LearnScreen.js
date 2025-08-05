@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import {
   View,
   Text,
@@ -7,102 +7,103 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
-  Image,
   Alert,
   Animated,
   Platform,
 } from "react-native"
 import { Video } from "expo-av"
 import { MaterialCommunityIcons } from "@expo/vector-icons"
-import { obtenerTodasLasSenas } from "../api/sign"
+import { obtenerTodosLosJuegos } from "../api/learn"
 import { useNavigation } from "@react-navigation/native"
-import { useContext } from "react"
-import { AuthContext } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import {
   responsiveWidth as rw,
   responsiveHeight as rh,
   responsiveFontSize as rf,
 } from "react-native-responsive-dimensions"
-import { obtenerTodosLosJuegos } from "../api/learn"
 
 const { width } = Dimensions.get("window")
 const CARD_WIDTH = rw(85)
-const CARD_HEIGHT = rh(35)
+const CARD_HEIGHT = rh(55)
+const SIGNS_PER_SESSION = 5; // Constante para el número de señas aleatorias
 
 const LearnScreen = () => {
-  const [signs, setSigns] = useState([])
+  const [allSigns, setAllSigns] = useState([]) // Almacena TODAS las señas
+  const [currentSessionSigns, setCurrentSessionSigns] = useState([]) // Almacena las 5 señas aleatorias actuales
+
   const [loading, setLoading] = useState(true)
   const [flippedCards, setFlippedCards] = useState({})
   const [playingVideos, setPlayingVideos] = useState({})
   const [score, setScore] = useState(0)
-  const [viewedSigns, setViewedSigns] = useState(new Set())
+  const [viewedInSession, setViewedInSession] = useState(new Set()) // Rastrea las vistas en la sesión actual
+
   const navigation = useNavigation()
-  const { user } = useContext(AuthContext)
   const { theme } = useTheme()
 
-  useEffect(() => {
-    fetchSigns()
-  }, [])
+  // --- CAMBIO CLAVE 1: Función para seleccionar 5 señas aleatorias ---
+  const selectRandomSigns = (sourceSigns) => {
+    // Barajar el array de señas y tomar las primeras 5
+    const shuffled = [...sourceSigns].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.min(shuffled.length, SIGNS_PER_SESSION));
+  };
 
-  const fetchSigns = async () => {
-    try {
-      const response = await obtenerTodosLosJuegos()
-      if (response.data && response.data.datos) {
-        // Filtrar solo señas activas
-        const activeSigns = response.data.datos.filter((sign) => sign.status === true)
-        setSigns(activeSigns)
-        console.log("Señas cargadas:", activeSigns.length)
+  useEffect(() => {
+    const fetchAndPrepareSigns = async () => {
+      setLoading(true);
+      try {
+        const response = await obtenerTodosLosJuegos();
+        if (response.data && response.data.datos) {
+          const activeSigns = response.data.datos.filter((sign) => sign.status === true);
+          setAllSigns(activeSigns); // Guardar la lista completa
+          
+          if (activeSigns.length > 0) {
+            // Iniciar la primera sesión con señas aleatorias
+            setCurrentSessionSigns(selectRandomSigns(activeSigns));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching signs:", error);
+        Alert.alert("Error", "No se pudieron cargar las señas. Por favor intenta de nuevo.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching signs:", error)
-      if (error.response && error.response.status === 401) {
-        Alert.alert("Error de autenticación", "Por favor inicia sesión para ver las señas", [
-          {
-            text: "OK",
-            onPress: () => navigation.navigate("Login"),
-          },
-        ])
-      } else {
-        Alert.alert("Error", "No se pudieron cargar las señas. Por favor intenta de nuevo.")
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
+    };
+    fetchAndPrepareSigns();
+  }, []);
 
   const toggleCard = (id) => {
-    setFlippedCards((prev) => {
-      const newFlipped = { ...prev, [id]: !prev[id] }
+    const isNowFlipped = !flippedCards[id];
+    setFlippedCards((prev) => ({ ...prev, [id]: isNowFlipped }));
+    setPlayingVideos((prev) => ({ ...prev, [id]: isNowFlipped }));
 
-      // Si la card se está volteando para mostrar el video
-      if (newFlipped[id] && !viewedSigns.has(id)) {
-        setViewedSigns((prevViewed) => new Set([...prevViewed, id]))
-        setScore((prevScore) => prevScore + 10)
+    if (isNowFlipped && !viewedInSession.has(id)) {
+      setViewedInSession((prev) => new Set(prev).add(id));
+      setScore((prevScore) => prevScore + 10);
+
+      // Comprobar si se completó la ronda actual
+      if (viewedInSession.size + 1 === currentSessionSigns.length) {
+          Alert.alert("¡Ronda Completada!", "¡Buen trabajo! Reinicia para obtener un nuevo desafío.", [{ text: "¡Genial!" }]);
       }
-
-      // Controlar reproducción de video
-      if (newFlipped[id]) {
-        setPlayingVideos((prev) => ({ ...prev, [id]: true }))
-      } else {
-        setPlayingVideos((prev) => ({ ...prev, [id]: false }))
-      }
-
-      return newFlipped
-    })
+    }
   }
-
+  
+  // --- CAMBIO CLAVE 2: Lógica de reinicio actualizada ---
   const resetGame = () => {
-    setFlippedCards({})
-    setPlayingVideos({})
-    setScore(0)
-    setViewedSigns(new Set())
-    Alert.alert("¡Juego reiniciado!", "Puedes empezar a aprender las señas nuevamente.")
+    setFlippedCards({});
+    setPlayingVideos({});
+    setScore(0);
+    setViewedInSession(new Set());
+    
+    // Generar una nueva sesión de 5 señas aleatorias
+    setCurrentSessionSigns(selectRandomSigns(allSigns));
+
+    Alert.alert("¡Nueva Ronda!", "Se han cargado 5 señas nuevas para que aprendas.");
   }
 
+  // --- CAMBIO CLAVE 3: El progreso ahora se basa en la sesión actual ---
   const getProgressPercentage = () => {
-    if (signs.length === 0) return 0
-    return Math.round((viewedSigns.size / signs.length) * 100)
+    if (currentSessionSigns.length === 0) return 0;
+    return Math.round((viewedInSession.size / currentSessionSigns.length) * 100);
   }
 
   if (loading) {
@@ -114,21 +115,16 @@ const LearnScreen = () => {
     )
   }
 
-  if (signs.length === 0) {
+  if (allSigns.length === 0) {
     return (
       <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#baca16" />
-          </TouchableOpacity>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}><MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#baca16" /></TouchableOpacity>
           <Text style={styles.title}>Aprende Señas</Text>
         </View>
         <View style={styles.emptyContainer}>
           <MaterialCommunityIcons name="hand-clap" size={rw(20)} color="#BACA16" />
           <Text style={[styles.emptyText, { color: theme.textColor }]}>No hay señas disponibles</Text>
-          <Text style={[styles.emptySubtext, { color: theme.textColor }]}>
-            Contacta al administrador para agregar contenido
-          </Text>
         </View>
       </View>
     )
@@ -137,63 +133,37 @@ const LearnScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#BACA16" />
-        </TouchableOpacity>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}><MaterialCommunityIcons name="chevron-left" size={rw(10)} color="#BACA16" /></TouchableOpacity>
         <Text style={styles.title}>Aprende LSM</Text>
         <Text style={styles.subtitle}>Toca las tarjetas para ver las señas</Text>
       </View>
 
-      {/* Panel de estadísticas */}
       <View style={[styles.statsPanel, { backgroundColor: theme.cardBackground }]}>
-        <View style={styles.statItem}>
-          <MaterialCommunityIcons name="trophy" size={rw(6)} color="#f6c80d" />
-          <Text style={[styles.statLabel, { color: theme.textColor }]}>Puntos</Text>
-          <Text style={[styles.statValue, { color: theme.textColor }]}>{score}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <MaterialCommunityIcons name="progress-check" size={rw(6)} color="#BACA16" />
-          <Text style={[styles.statLabel, { color: theme.textColor }]}>Progreso</Text>
-          <Text style={[styles.statValue, { color: theme.textColor }]}>{getProgressPercentage()}%</Text>
-        </View>
-        <View style={styles.statItem}>
-          <MaterialCommunityIcons name="hand-clap" size={rw(6)} color="#597cff" />
-          <Text style={[styles.statLabel, { color: theme.textColor }]}>Señas</Text>
-          <Text style={[styles.statValue, { color: theme.textColor }]}>
-            {viewedSigns.size}/{signs.length}
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.resetButton} onPress={resetGame}>
-          <MaterialCommunityIcons name="refresh" size={rw(5)} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.statItem}><MaterialCommunityIcons name="trophy" size={rw(6)} color="#f6c80d" /><Text style={[styles.statLabel, { color: theme.textColor }]}>Puntos</Text><Text style={[styles.statValue, { color: theme.textColor }]}>{score}</Text></View>
+        <View style={styles.statItem}><MaterialCommunityIcons name="progress-check" size={rw(6)} color="#BACA16" /><Text style={[styles.statLabel, { color: theme.textColor }]}>Progreso</Text><Text style={[styles.statValue, { color: theme.textColor }]}>{getProgressPercentage()}%</Text></View>
+        <View style={styles.statItem}><MaterialCommunityIcons name="hand-clap" size={rw(6)} color="#597cff" /><Text style={[styles.statLabel, { color: theme.textColor }]}>Vistas</Text><Text style={[styles.statValue, { color: theme.textColor }]}>{viewedInSession.size}/{currentSessionSigns.length}</Text></View>
+        <TouchableOpacity style={styles.resetButton} onPress={resetGame}><MaterialCommunityIcons name="refresh" size={rw(5)} color="#fff" /></TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {signs.map((sign) => (
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* --- CAMBIO CLAVE 4: Mapear sobre el array de la sesión actual --- */}
+        {currentSessionSigns.map((sign) => (
           <SignCard
             key={`sign-${sign.id}`}
             sign={sign}
-            isFlipped={flippedCards[sign.id]}
-            isPlaying={playingVideos[sign.id]}
-            isViewed={viewedSigns.has(sign.id)}
+            isFlipped={!!flippedCards[sign.id]}
+            isPlaying={!!playingVideos[sign.id]}
+            isViewed={viewedInSession.has(sign.id)}
             onToggle={() => toggleCard(sign.id)}
             theme={theme}
           />
         ))}
 
-        {/* Mensaje de felicitación si completó todas */}
-        {viewedSigns.size === signs.length && signs.length > 0 && (
+        {viewedInSession.size === currentSessionSigns.length && currentSessionSigns.length > 0 && (
           <View style={[styles.completionCard, { backgroundColor: theme.cardBackground }]}>
             <MaterialCommunityIcons name="trophy-award" size={rw(15)} color="#f6c80d" />
             <Text style={[styles.completionTitle, { color: theme.textColor }]}>¡Felicitaciones!</Text>
-            <Text style={[styles.completionText, { color: theme.textColor }]}>
-              Has completado todas las señas disponibles
-            </Text>
-            <Text style={[styles.completionScore, { color: "#BACA16" }]}>Puntuación final: {score} puntos</Text>
+            <Text style={[styles.completionText, { color: theme.textColor }]}>Has completado esta ronda. ¡Reinicia para un nuevo desafío!</Text>
           </View>
         )}
       </ScrollView>
@@ -202,95 +172,54 @@ const LearnScreen = () => {
 }
 
 const SignCard = ({ sign, isFlipped, isPlaying, isViewed, onToggle, theme }) => {
-  const flipAnimation = new Animated.Value(isFlipped ? 1 : 0)
+    // El componente SignCard no necesita cambios
+    const flipAnimation = new Animated.Value(isFlipped ? 1 : 0)
 
-  React.useEffect(() => {
-    Animated.timing(flipAnimation, {
-      toValue: isFlipped ? 1 : 0,
-      duration: 600,
-      useNativeDriver: true,
-    }).start()
-  }, [isFlipped])
-
-  const frontInterpolate = flipAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  })
-
-  const backInterpolate = flipAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["180deg", "360deg"],
-  })
-
-  return (
-    <TouchableOpacity style={styles.cardContainer} onPress={onToggle} activeOpacity={0.9}>
-      <View style={styles.card}>
-        {/* Frente de la tarjeta */}
-        <Animated.View
-          style={[
-            styles.cardFace,
-            styles.cardFront,
-            { backgroundColor: theme.cardBackground },
-            { transform: [{ rotateY: frontInterpolate }] },
-          ]}
-        >
-          <View style={styles.cardHeader}>
-            {isViewed && (
-              <View style={styles.viewedBadge}>
-                <MaterialCommunityIcons name="check-circle" size={rw(5)} color="#4CAF50" />
-              </View>
-            )}
-          </View>
-          <MaterialCommunityIcons name="hand-clap" size={rw(15)} color="#BACA16" style={styles.cardIcon} />
-          <Text style={[styles.cardTitle, { color: theme.textColor }]}>{sign.nombre}</Text>
-          <Text style={[styles.tapText, { color: theme.textColor }]}>Toca para ver la seña</Text>
-          <View style={styles.cardFooter}>
-            <MaterialCommunityIcons name="play-circle" size={rw(8)} color="#BACA16" />
-          </View>
-        </Animated.View>
-
-        {/* Parte trasera de la tarjeta */}
-        <Animated.View
-          style={[
-            styles.cardFace,
-            styles.cardBack,
-            { backgroundColor: theme.cardBackground },
-            { transform: [{ rotateY: backInterpolate }] },
-          ]}
-        >
-          <View style={styles.videoContainer}>
-            {sign.foto ? (
-              <Video
-                key={`video-${sign.id}-${isPlaying}`}
-                source={{ uri: sign.foto }}
-                style={styles.video}
-                useNativeControls
-                resizeMode="contain"
-                isLooping
-                shouldPlay={isPlaying}
-                onError={(error) => {
-                  console.log("Error loading video:", error)
-                }}
-              />
-            ) : (
-              <View style={styles.noVideoContainer}>
-                <MaterialCommunityIcons name="video-off" size={rw(10)} color="#ccc" />
-                <Text style={[styles.noVideoText, { color: theme.textColor }]}>Video no disponible</Text>
-              </View>
-            )}
-          </View>
-          <Text style={[styles.cardTitleBack, { color: theme.textColor }]}>{sign.nombre}</Text>
-          <TouchableOpacity style={styles.flipBackButton} onPress={onToggle}>
-            <MaterialCommunityIcons name="arrow-left" size={rw(5)} color="#BACA16" />
-            <Text style={styles.flipBackText}>Volver</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-    </TouchableOpacity>
-  )
+    React.useEffect(() => {
+      Animated.timing(flipAnimation, {
+        toValue: isFlipped ? 1 : 0,
+        duration: 600,
+        useNativeDriver: true,
+      }).start()
+    }, [isFlipped])
+  
+    const frontInterpolate = flipAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0deg", "180deg"],
+    })
+  
+    const backInterpolate = flipAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["180deg", "360deg"],
+    })
+  
+    return (
+      <TouchableOpacity style={styles.cardContainer} onPress={onToggle} activeOpacity={0.9}>
+        <View style={styles.card}>
+          <Animated.View style={[styles.cardFace, styles.cardFront, { backgroundColor: theme.cardBackground }, { transform: [{ rotateY: frontInterpolate }] }]}>
+            <View style={styles.cardHeader}>
+              {isViewed && (<View style={styles.viewedBadge}><MaterialCommunityIcons name="check-circle" size={rw(5)} color="#4CAF50" /></View>)}
+            </View>
+            <MaterialCommunityIcons name="hand-clap" size={rw(15)} color="#BACA16" style={styles.cardIcon} />
+            <Text style={[styles.cardTitle, { color: theme.textColor }]}>{sign.nombre}</Text>
+            <Text style={[styles.tapText, { color: theme.textColor }]}>Toca para ver la seña</Text>
+            <View style={styles.cardFooter}><MaterialCommunityIcons name="play-circle" size={rw(8)} color="#BACA16" /></View>
+          </Animated.View>
+          <Animated.View style={[styles.cardFace, styles.cardBack, { backgroundColor: theme.cardBackground }, { transform: [{ rotateY: backInterpolate }] }]}>
+            <View style={styles.videoContainer}>
+              {sign.foto ? (<Video key={`video-${sign.id}-${isPlaying}`} source={{ uri: sign.foto }} style={styles.video} useNativeControls resizeMode="contain" isMuted={true} isLooping shouldPlay={isPlaying} onError={(error) => console.log("Error loading video:", error)} />) : (<View style={styles.noVideoContainer}><MaterialCommunityIcons name="video-off" size={rw(10)} color="#ccc" /><Text style={[styles.noVideoText, { color: theme.textColor }]}>Video no disponible</Text></View>)}
+            </View>
+            <Text style={[styles.cardTitleBack, { color: theme.textColor }]}>{sign.nombre}</Text>
+            <TouchableOpacity style={styles.flipBackButton} onPress={onToggle}><MaterialCommunityIcons name="arrow-left" size={rw(5)} color="#BACA16" /><Text style={styles.flipBackText}>Volver</Text></TouchableOpacity>
+          </Animated.View>
+        </View>
+      </TouchableOpacity>
+    )
 }
 
+
 const styles = StyleSheet.create({
+  // Tus estilos existentes no se modifican
   container: {
     flex: 1,
     backgroundColor: "#fcfcfc",
@@ -403,7 +332,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 5,
-    padding: rw(4),
+    padding: rw(2),
   },
   cardFront: {
     backgroundColor: "#fff",
@@ -449,15 +378,16 @@ const styles = StyleSheet.create({
     marginTop: rh(1),
   },
   videoContainer: {
-    width: "100%",
     height: "70%",
     borderRadius: rw(3),
     overflow: "hidden",
     backgroundColor: "#000",
   },
   video: {
-    width: "100%",
     height: "100%",
+    aspectRatio: 9 / 16,
+    borderRadius: rw(3),
+    alignSelf: "center",
   },
   noVideoContainer: {
     width: "100%",
@@ -536,4 +466,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default LearnScreen
+export default LearnScreen;

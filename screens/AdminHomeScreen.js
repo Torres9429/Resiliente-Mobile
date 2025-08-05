@@ -34,6 +34,8 @@ const AdminHomeScreen = () => {
     activeGames: 0,
     recentProducts: [],
     recentWaiters: [],
+    recentSigns: [],
+    recentGames: [],
   })
   const [loading, setLoading] = useState(true)
 
@@ -100,6 +102,7 @@ const AdminHomeScreen = () => {
       // Procesar juegos
       const games = gamesRes.data.datos || []
       const activeGames = games.filter((game) => game.status === true)
+      const recentGames = games.sort((a, b) => b.id - a.id).slice(0, 5)
 
       setStats({
         totalProducts: products.length,
@@ -113,6 +116,7 @@ const AdminHomeScreen = () => {
         recentProducts: recentProducts,
         recentWaiters: recentWaiters,
         recentSigns: recentSigns,
+        recentGames: recentGames,
       })
     } catch (error) {
       console.error("Error fetching stats:", error)
@@ -192,6 +196,31 @@ const AdminHomeScreen = () => {
       </View>
     </View>
   )
+const renderRecentGame = ({ item }) => (
+    <View
+      style={[styles.recentItemCard, { backgroundColor: theme.cardBackground }]}
+    >
+      {item.video && item.video !== "" ? (
+                <Video
+                    source={{ uri: item.video }}
+                    style={styles.video}
+                    resizeMode={ResizeMode.COVER}
+                    isLooping
+                    useNativeControls
+                />
+            ) : (
+                <View style={styles.videoOff}>
+                    <MaterialCommunityIcons name="video-off" size={rw(10)} color="#ccc" />
+                    <Text style={[styles.noVideoText, { color: theme.textColor }]}>Video no disponible</Text>
+                </View>
+            )}
+      <View style={styles.recentItemInfo}>
+        <Text style={[styles.recentItemName, { color: theme.textColor }]} numberOfLines={2}>
+          {item.nombre}
+        </Text>
+      </View>
+    </View>
+  )
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
@@ -263,6 +292,35 @@ const AdminHomeScreen = () => {
               </View>
             )}
           </View>
+
+          {/* Últimos meseros agregados */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <MaterialCommunityIcons name="account-clock" size={24} color={theme.primaryColor} />
+              <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Últimos Meseros Agregados</Text>
+            </View>
+            
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <Text style={[styles.loadingText, { color: theme.textColor }]}>Cargando meseros...</Text>
+              </View>
+            ) : stats.recentWaiters.length > 0 ? (
+              <FlatList
+                data={stats.recentWaiters}
+                renderItem={renderRecentWaiter}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.recentItemsList}
+              />
+            ) : (
+              <View style={styles.emptyContainer}>
+                <MaterialCommunityIcons name="account-off" size={48} color="#ccc" />
+                <Text style={[styles.emptyText, { color: theme.textColor }]}>No hay meseros recientes</Text>
+              </View>
+            )}
+          </View>
+
           {/* Últimas señas agregadas */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -291,21 +349,21 @@ const AdminHomeScreen = () => {
             )}
           </View>
 
-          {/* Últimos productos agregados */}
+          {/* Últimos juegos agregados */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <MaterialCommunityIcons name="clock-outline" size={24} color={theme.primaryColor} />
-              <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Últimos Productos Agregados</Text>
+              <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Últimos Juegos Agregados</Text>
             </View>
 
             {loading ? (
               <View style={styles.loadingContainer}>
-                <Text style={[styles.loadingText, { color: theme.textColor }]}>Cargando productos...</Text>
+                <Text style={[styles.loadingText, { color: theme.textColor }]}>Cargando juegos...</Text>
               </View>
-            ) : stats.recentProducts.length > 0 ? (
+            ) : stats.recentGames.length > 0 ? (
               <FlatList
-                data={stats.recentProducts}
-                renderItem={renderRecentProduct}
+                data={stats.recentGames}
+                renderItem={renderRecentGame}
                 keyExtractor={(item) => item.id.toString()}
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -315,34 +373,6 @@ const AdminHomeScreen = () => {
               <View style={styles.emptyContainer}>
                 <MaterialCommunityIcons name="food-off" size={48} color="#ccc" />
                 <Text style={[styles.emptyText, { color: theme.textColor }]}>No hay productos recientes</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Últimos meseros agregados */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <MaterialCommunityIcons name="account-clock" size={24} color={theme.primaryColor} />
-              <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Últimos Meseros Agregados</Text>
-            </View>
-            
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <Text style={[styles.loadingText, { color: theme.textColor }]}>Cargando meseros...</Text>
-              </View>
-            ) : stats.recentWaiters.length > 0 ? (
-              <FlatList
-                data={stats.recentWaiters}
-                renderItem={renderRecentWaiter}
-                keyExtractor={(item) => item.id.toString()}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.recentItemsList}
-              />
-            ) : (
-              <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons name="account-off" size={48} color="#ccc" />
-                <Text style={[styles.emptyText, { color: theme.textColor }]}>No hay meseros recientes</Text>
               </View>
             )}
           </View>
@@ -639,7 +669,7 @@ const styles = StyleSheet.create({
     aspectRatio: 9/16,
   },
   noVideoText: {
-    fontSize: rf(1.6),
+    fontSize: rf(1.3),
     color: "#666",
     marginTop: rh(1),
   },
